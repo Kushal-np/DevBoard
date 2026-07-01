@@ -1,0 +1,84 @@
+import { Request, Response } from "express";
+import bcrypt from "bcrypt";
+
+import User from "../models/user.model";
+import generateToken from "../utils/generateToken";
+
+import { IUserResponse } from "../interfaces/Response";
+import { IAuthResponse } from "../interfaces/Response/AuthResponse";
+
+export const register = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { name, email, username, passwordHash } = req.body;
+
+    if (!name || !email || !username || !passwordHash) {
+      res.status(400).json({
+        success: false,
+        message: "Please provide name, email, username, and password.",
+      });
+      return;
+    }
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      res.status(409).json({
+        success: false,
+        message: "User with this email already exists.",
+      });
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(passwordHash, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      username,
+      passwordHash: hashedPassword,
+    });
+
+    const userResponse: IUserResponse = {
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      passwordHash: user.passwordHash,
+      followerCount: user.followerCount,
+      followingCount: user.followingCount,
+      followers: user.followers,
+      following: user.following,
+      bio: user.bio,
+      profile_url: user.profile_url,
+      cover_url: user.cover_url,
+    };
+
+    const token = generateToken({
+      userId: user._id.toString(),
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false, 
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    const response: IAuthResponse = {
+      success: true,
+      message: "User registered successfully!",
+      user: userResponse,
+    };
+
+    res.status(201).json(response);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+    });
+  }
+};

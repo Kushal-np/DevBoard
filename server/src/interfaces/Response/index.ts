@@ -1,12 +1,13 @@
-import {Types} from "mongoose";
-export interface ISocialMedia{
-    github? : string ; 
-    twitter? : string ; 
-    linkedin? : string; 
-    portfolio?: string;
+import { Types } from "mongoose";
+import { ISocialMedia } from "../dbModels/user.interface.models"; 
+export interface IRegisterResponse{
+    name:string;
+    email:string;
+    username:string;
+    passwordHash:string;
 }
 
-export interface IUser{
+export interface IUserResponse{
     username:string ; 
     email: string ; 
     name : string ; 
@@ -18,5 +19,6 @@ export interface IUser{
     bio: string ; 
     profile_url : string ; 
     cover_url : string; 
-    socialMedia? : ISocialMedia
+    socialMedia? : ISocialMedia[]
+
 }
