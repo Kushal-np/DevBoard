@@ -1,0 +1,12 @@
+import express from "express";
+import {Router} from "express";
+import { authMiddleware } from "../middleware/auth.middleware";
+import { getUserProfile } from "../controllers/profile.controller";
+const router = express.Router();
+router.get("/:username" ,getUserProfile);
+// router.patch("/profile");
+// router.delete("/");
+// router.post("/:id/follow");
+// router.delete("/:id/follow");
+// router.get("/:username/projects");
+export default router;

@@ -6,6 +6,7 @@ import generateToken from "../utils/generateToken";
 
 import { IUserResponse } from "../interfaces/Response";
 import { IAuthResponse } from "../interfaces/Response/AuthResponse";
+import { AuthRequest } from "../middleware/auth.middleware";
 
 export const register = async (
     req: Request,
@@ -169,7 +170,7 @@ export const logout = async(req:Request , res:Response) =>{
     }
 }
 
-export const getMe = async(req:Request , res:Response) =>{
+export const getMe = async(req:AuthRequest , res:Response) =>{
     try{
         const userId = req.user?._id;
         console.log(userId);

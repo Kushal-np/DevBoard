@@ -5,22 +5,27 @@ import { ISocialMedia } from "../interfaces/dbModels/user.interface.models";
 import { IJWTPayload } from "../interfaces/Response/Jwt";
 import User from "../models/user.model";
 
-export interface AuthRequest extends Request {
-    user?: {
-        _id:string;
-        username: string;
-        email: string;
-        name: string;
-        passwordHash: string;
-        followerCount: number;
-        followingCount: number;
-        followers: Types.ObjectId[];
-        following: Types.ObjectId[];
-        bio: string;
-        profile_url: string;
-        cover_url: string;
-        socialMedia?: ISocialMedia
-    }
+export interface AuthRequest<
+  P = {},
+  ResBody = any,
+  ReqBody = any,
+  ReqQuery = any
+> extends Request<P, ResBody, ReqBody, ReqQuery> {
+  user?: {
+    _id: string;
+    username: string;
+    email: string;
+    name: string;
+    passwordHash: string;
+    followerCount: number;
+    followingCount: number;
+    followers: Types.ObjectId[];
+    following: Types.ObjectId[];
+    bio: string;
+    profile_url: string;
+    cover_url: string;
+    socialMedia?: ISocialMedia;
+  };
 }
 
 export const authMiddleware = async(req: AuthRequest , res:Response , next:NextFunction) =>{
