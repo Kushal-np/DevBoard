@@ -1,10 +1,9 @@
-import { Response } from "express";
-import { AuthRequest } from "../middleware/auth.middleware";
+import { Response , Request} from "express";
 import Project from "../models/project.model";
 import cloudinary from "../utils/cloudinary";
 
 export const createPost = async (
-    req: AuthRequest,
+    req: Request,
     res: Response
 ): Promise<void> => {
     try {
@@ -103,7 +102,7 @@ export const createPost = async (
     }
 };
 
-export const getPosts = async(req:AuthRequest , res:Response):Promise<void> =>{
+export const getPosts = async(req:Request , res:Response):Promise<void> =>{
     try{
         const userId = req.user?._id
 
@@ -129,30 +128,45 @@ export const getPosts = async(req:AuthRequest , res:Response):Promise<void> =>{
         })
     }
 }
-
-export const getPostsById = async(req:AuthRequest , res:Response):Promise<void> =>{
-    try{
-        const userId = req.user?._id;
-        if(!userId){
-            res.status(401).json({
-                success:false , 
-                message:"User isn't authenticated"
-            })
-        }else{
-            const postId = req.params;
-            const post = await Project.findOne({postId});
-            res.status(201).json({
-                success:true , 
-                post , 
-                message:"Post found successfully!"
-            })
-        }
-        
-    }
-    catch(error){
-        res.status(500).json({
-            success:false , 
-            message:"Internal server error"
-        })
-    }
+interface UserParams {
+  id: string;
 }
+export const getPostsById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.user?._id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "User isn't authenticated",
+      });
+      return;
+    }
+
+    const { id } = req.params;
+
+    const post = await Project.findById(id);
+
+    if (!post) {
+      res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      post,
+      message: "Post found successfully!",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
