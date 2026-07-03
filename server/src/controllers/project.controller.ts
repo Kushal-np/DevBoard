@@ -102,3 +102,30 @@ export const createPost = async (
         });
     }
 };
+
+export const getPosts = async(req:AuthRequest , res:Response):Promise<void> =>{
+    try{
+        const userId = req.user?._id
+
+        if(!userId){
+            res.status(401).json({
+                success:false , 
+                message:"user isn't authenticated"
+            })
+        }
+
+        const Projects = await Project.find();
+
+        res.status(201).json({
+            success : true , 
+            Projects , 
+            message:"Projects fetched successfully"
+        })
+    }
+    catch(error){
+        res.status(500).json({
+            success:false , 
+            message:"Internal server error"
+        })
+    }
+}
