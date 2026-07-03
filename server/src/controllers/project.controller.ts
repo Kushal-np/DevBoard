@@ -129,3 +129,30 @@ export const getPosts = async(req:AuthRequest , res:Response):Promise<void> =>{
         })
     }
 }
+
+export const getPostsById = async(req:AuthRequest , res:Response):Promise<void> =>{
+    try{
+        const userId = req.user?._id;
+        if(!userId){
+            res.status(401).json({
+                success:false , 
+                message:"User isn't authenticated"
+            })
+        }else{
+            const postId = req.params;
+            const post = await Project.findOne({postId});
+            res.status(201).json({
+                success:true , 
+                post , 
+                message:"Post found successfully!"
+            })
+        }
+        
+    }
+    catch(error){
+        res.status(500).json({
+            success:false , 
+            message:"Internal server error"
+        })
+    }
+}
