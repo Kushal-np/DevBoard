@@ -9,7 +9,7 @@ export const createPost = async (
 ): Promise<void> => {
     try {
         const userId = req.user?._id;
-
+        console.log(userId);
         if (!userId) {
             res.status(401).json({
                 success: false,
@@ -62,7 +62,7 @@ export const createPost = async (
             return;
         }
 
-        let thumbnailUrl = "";
+        let thumbnailUrl :  string | undefined = "";
 
         if (req.file) {
             const uploadResult = await cloudinary.uploader.upload(req.file.path, {
