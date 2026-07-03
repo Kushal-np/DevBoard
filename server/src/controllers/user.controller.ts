@@ -82,3 +82,19 @@ export const register = async (
     });
   }
 };
+
+
+export const login = async(req:Request , res:Response) =>{
+    try{
+        const {username , passwordHash} = req.body;
+        if(!username || !passwordHash){
+            res.status(400).json({
+                success:fasle , 
+                message:"Please provide username and password"
+            })
+        }
+    }
+    catch(error){
+
+    }
+} 
