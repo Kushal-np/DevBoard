@@ -206,7 +206,9 @@ export const followUser = async (req: Request, res: Response): Promise<void> => 
             return;
         }
         const currentUser = await User.findById(req.user._id);
-        const userToFollow = await User.findById(req.params.userId);
+        console.log("this is current",currentUser)
+        const userToFollow = await User.findById(req.params.id);
+        console.log("this is the the user to follow ",userToFollow)
         if (!currentUser || !userToFollow) {
             res.status(404).json({
                 success: false,
@@ -260,9 +262,9 @@ try {
       return;
     }
 
-    const { userId } = req.params as {userId:string};
+    const { id } = req.params as {id:string};
 
-    const userToUnfollow = await User.findById(userId);
+    const userToUnfollow = await User.findById(id);
 
     if (!userToUnfollow) {
       res.status(404).json({
@@ -274,7 +276,7 @@ try {
 
     const isFollowing = await User.exists({
       _id: req.user._id,
-      following: userId,
+      following: id,
     });
 
     if (!isFollowing) {
@@ -286,11 +288,11 @@ try {
     }
 
     await User.findByIdAndUpdate(req.user._id, {
-      $pull: { following: userId },
+      $pull: { following: id },
       $inc: { followingCount: -1 },
     });
 
-    await User.findByIdAndUpdate(userId, {
+    await User.findByIdAndUpdate(id, {
       $pull: { followers: req.user._id },
       $inc: { followerCount: -1 },
     });
