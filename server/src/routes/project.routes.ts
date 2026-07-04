@@ -7,5 +7,6 @@ const router = express.Router();
 
 router.post("/create-post" ,authMiddleware, upload.single("thumbnail") , createPost);
 router.get("/get-post" , authMiddleware , getPosts);
-router.get("/get-post/:postId" , authMiddleware , getPostsById);
+router.get("/get-post/:id" , authMiddleware , getPostsById);
+router.get("/getFeed" , authMiddleware , )
 export default router;

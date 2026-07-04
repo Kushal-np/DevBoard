@@ -170,3 +170,36 @@ export const getPostsById = async (
     });
   }
 };
+
+
+export const getFeed = async(req :Request , res:Response) :Promise<void> =>{
+    try{
+        if(!req.user){
+            res.status(401).json({
+                success:false , 
+                message:"Unathourized",
+            });
+            return ; 
+        }
+
+        const feedUserIds = [...req.user?.following , req.user?._id];
+        const projects = await Project.find({
+            userId:{$in:feedUserIds},
+            status:"published",
+        }).populate("userId","name username profile_url")
+          .sort({createdAt:-1});
+
+        res.status(200).json({
+            success:true , 
+            projects , 
+            message:"Feed fetched successfully"
+        });
+    }
+    catch(error){
+        console.error(error);
+        res.status(500).json({
+            success:false , 
+            message:"Internal server error"
+        });
+    }
+};
