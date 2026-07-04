@@ -42,7 +42,13 @@ const projectSchema = new mongoose.Schema<IProject>({
     }, 
     thumbnailUrl:{
         type:String 
-    },
+    },   
+    stars:[
+        {
+            type: Schema.Types.ObjectId , 
+            ref:"star"
+        }
+    ],
     starCount:{
         type:Number , 
         default:0,

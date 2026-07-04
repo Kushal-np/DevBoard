@@ -3,7 +3,7 @@ import {Router} from "express";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { getUserProfile } from "../controllers/profile.controller";
 const router = express.Router();
-router.get("/:id" ,authMiddleware , getUserProfile);
+router.get("/:username" ,authMiddleware , getUserProfile);
 // router.patch("/profile");
 // router.delete("/");
 // router.post("/:id/follow");
