@@ -146,53 +146,165 @@ export const login = async (req: Request, res: Response) => {
             message: "Internal error",
         });
     }
-} 
+}
 
-export const logout = async(req:Request , res:Response) =>{
-    try{
-        res.cookie("token" ,'' , {
-            httpOnly:true , 
-            secure:false , 
-            sameSite:"strict" , 
-            maxAge:0,
+export const logout = async (req: Request, res: Response) => {
+    try {
+        res.cookie("token", '', {
+            httpOnly: true,
+            secure: false,
+            sameSite: "strict",
+            maxAge: 0,
         });
         res.json({
-            success:true , 
-            message:"Logged out successfully"
+            success: true,
+            message: "Logged out successfully"
         });
     }
-    catch(error){
+    catch (error) {
         res.status(500).json({
-            success:false , 
-            message:"server error" , 
+            success: false,
+            message: "server error",
         });
     }
 }
 
-export const getMe = async(req:Request , res:Response) =>{
-    try{
+export const getMe = async (req: Request, res: Response) => {
+    try {
         const userId = req.user?._id;
         console.log(userId);
         const user = await User.findById(userId);
 
-        if(!user){
+        if (!user) {
             res.status(404).json({
-                success:false , 
-                message:"User not found"
+                success: false,
+                message: "User not found"
             });
-            return ; 
+            return;
         }
-        
+
         res.status(200).json({
-            success:true , 
-            user 
+            success: true,
+            user
         });
     }
-    catch(error){
+    catch (error) {
         res.status(500).json({
-            success:false , 
-            message:"Error occured" , 
+            success: false,
+            message: "Error occured",
         });
     }
 }
 
+export const followUser = async (req: Request, res: Response): Promise<void> => {
+    try {
+        if (!req.user) {
+            res.status(401).json({
+                success: false,
+                message: "Unathourized"
+            });
+            return;
+        }
+        const currentUser = await User.findById(req.user._id);
+        const userToFollow = await User.findById(req.params.userId);
+        if (!currentUser || !userToFollow) {
+            res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+            return;
+        }
+        if (currentUser._id.equals(userToFollow._id)) {
+            res.status(400).json({
+                success: false,
+                message: "You cannot follow yourself"
+            });
+            return;
+        }
+        if (currentUser.following.includes(userToFollow._id)) {
+            res.status(400).json({
+                success: false,
+                message: "Already following this user",
+            });
+            return;
+        }
+        currentUser.following.push(userToFollow._id);
+        currentUser.followingCount++;
+        userToFollow.followers.push(currentUser._id);
+        userToFollow.followerCount++;
+
+        await currentUser.save();
+        await userToFollow.save();
+
+        res.status(200).json({
+            success: true,
+            message: "User followed successfully!"
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        })
+    }
+}
+
+export const unfollowUser = async (req: Request, res: Response): Promise<void> => {
+try {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+      return;
+    }
+
+    const { userId } = req.params as {userId:string};
+
+    const userToUnfollow = await User.findById(userId);
+
+    if (!userToUnfollow) {
+      res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+      return;
+    }
+
+    const isFollowing = await User.exists({
+      _id: req.user._id,
+      following: userId,
+    });
+
+    if (!isFollowing) {
+      res.status(400).json({
+        success: false,
+        message: "You are not following this user.",
+      });
+      return;
+    }
+
+    await User.findByIdAndUpdate(req.user._id, {
+      $pull: { following: userId },
+      $inc: { followingCount: -1 },
+    });
+
+    await User.findByIdAndUpdate(userId, {
+      $pull: { followers: req.user._id },
+      $inc: { followerCount: -1 },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "User unfollowed successfully.",
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+    });
+  }
+};
