@@ -1,106 +1,60 @@
 import {
-    createContext,
-    useEffect,
-    useState,
-    type ReactNode,
+  createContext,
+  useContext,
+  useState,
+  type ReactNode,
 } from "react";
 
-
-import type { IUser } from "../types/Auth";
-
-import * as AuthService from "../api/services/auth.service";
+interface User {
+  username: string;
+  email: string;
+}
 
 interface AuthContextType {
-    user: IUser | null;
-    isAuthenticated: boolean;
-    isLoading: boolean;
-
-    login: (
-        email: string,
-        password: string
-    ) => Promise<void>;
-
-    register: (
-        name: string,
-        username: string,
-        email: string,
-        password: string
-    ) => Promise<void>;
-
-    logout: () => Promise<void>;
+  user: User | null;
+  login: (username: string, email: string) => void;
+  logout: () => void;
 }
 
+const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const [user, setUser] = useState<User | null>(null);
 
-interface Props {
-    children: ReactNode;
-}
+  const login = (username: string, email: string) => {
+    setUser({
+      username,
+      email,
+    });
+  };
 
-export const AuthProvider = ({ children }: Props) => {
-    const [user, setUser] = useState<IUser | null>(null);
+  const logout = () => {
+    setUser(null);
+  };
 
-    const [isLoading, setLoading] = useState(true);
-
-    useEffect(() => {
-        checkAuth();
-    }, []);
-
-    const checkAuth = async () => {
-        try {
-            const response = await AuthService.getCurrentUser();
-
-            setUser(response.user);
-        }
-        catch {
-            setUser(null);
-        }
-        finally {
-            setLoading(false);
-        }
-    };
-
-    const login = async (username: string, password: string) => {
-        const response = await AuthService.login(username, password);
-        setUser(response.user);
-
-    };
-
-    const register = async (
-        name: string,
-        username: string,
-        email: string,
-        password: string
-    ) => {
-        const response =
-            await AuthService.register(
-                name,
-                username,
-                email,
-                password
-            );
-
-        setUser(response.user);
-    };
-
-    const logout = async () => {
-        await AuthService.logout();
-
-        setUser(null);
-    };
-     return (
+  return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: user !== null,
-        isLoading,
-
         login,
-        register,
         logout,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
-}
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth must be used inside AuthProvider");
+  }
+
+  return context;
+};

@@ -1,10 +1,11 @@
+// useTheme.ts - Updated error message
 import { useContext } from "react";
 import { ThemeContext } from "./ThemeProvider";
 
-export const useTheme = () =>{
-    const context = useContext(ThemeContext);
-    if(!context){
-        throw new Error("useTheme must be used inside the themeprovider");
-    }
-    return context;
-}
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+  return context;
+};

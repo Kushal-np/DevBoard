@@ -7,14 +7,12 @@ export interface ISocialMedia {
 
 export interface IUser {
   _id: string;
-
   username: string;
   email: string;
   name: string;
-
+  passwordHash:string;  
   followerCount: number;
   followingCount: number;
-
   followers: string[];
   following: string[];
 

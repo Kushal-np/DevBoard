@@ -1,19 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   THE FIX
+   In Tailwind v4, utilities such as `bg-surface`, `text-text`,
+   `border-border`, `bg-primary/10`, `bg-success` are ONLY generated when the
+   color tokens live inside an `@theme` block. Previously the tokens were only
+   declared in `:root` / `[data-theme]`, so Tailwind never knew about them and
+   those utilities silently produced nothing — which is why the Navbar's
+   semantic classes (and any theming) didn't take.
 
+   Registering them here does two things at once:
+   1. Generates the semantic utilities.
+   2. Emits them as CSS variables that the utilities reference via var(),
+      so overriding the variables per theme (below) re-colors the whole app.
+   Note: do NOT use `@theme inline` — inline bakes the value into the utility
+   and breaks runtime theme switching.
+--------------------------------------------------------------------------- */
 @theme {
-  --color-background: var(--color-background);
-  --color-surface: var(--color-surface);
-  --color-surfaceHover: var(--color-surfaceHover);
-  --color-primary: var(--color-primary);
-  --color-primaryHover: var(--color-primaryHover);
-  --color-secondary: var(--color-secondary);
-  --color-text: var(--color-text);
-  --color-textSecondary: var(--color-textSecondary);
-  --color-border: var(--color-border);
-  --color-success: var(--color-success);
-  --color-danger: var(--color-danger);
-  --color-warning: var(--color-warning);
-  --color-link: var(--color-link);
-  --color-accent: var(--color-accent);
+  --color-background: #000000;
+  --color-surface: #0a0a0a;
+  --color-surfaceHover: #141414;
+  --color-primary: #ffffff;
+  --color-primaryHover: #e0e0e0;
+  --color-secondary: #6b7280;
+  --color-text: #ffffff;
+  --color-textSecondary: #9ca3af;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-success: #22c55e;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-link: #60a5fa;
+  --color-overlay: rgba(0, 0, 0, 0.6);
+  --color-accent: #8b5cf6;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* ---------------------------------------------------------------------------
+   Theme overrides. Unlayered so they always win over the generated :root
+   defaults. The ThemeProvider also sets these via inline styles at runtime,
+   which harmlessly takes precedence — either path re-colors every utility.
+--------------------------------------------------------------------------- */
+[data-theme="dark"] {
+  --color-background: #000000;
+  --color-surface: #0a0a0a;
+  --color-surfaceHover: #141414;
+  --color-primary: #ffffff;
+  --color-primaryHover: #e0e0e0;
+  --color-secondary: #6b7280;
+  --color-text: #ffffff;
+  --color-textSecondary: #9ca3af;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-success: #22c55e;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-link: #60a5fa;
+  --color-overlay: rgba(0, 0, 0, 0.6);
+  --color-accent: #8b5cf6;
+}
+
+[data-theme="light"] {
+  --color-background: #ffffff;
+  --color-surface: #f7f7f9;
+  --color-surfaceHover: #ededf1;
+  --color-primary: #0a0a0a;
+  --color-primaryHover: #262626;
+  --color-secondary: #6b7280;
+  --color-text: #0a0a0a;
+  --color-textSecondary: #52525b;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --color-warning: #d97706;
+  --color-link: #2563eb;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-accent: #7c3aed;
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+
+  ::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-secondary);
+  }
+
+  /* Theme-aware selection derived from the primary token */
+  ::selection {
+    background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+    color: var(--color-text);
+  }
+
+  /* Respect reduced-motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .font-mono-custom {
+    font-family: var(--font-mono);
+  }
 }
