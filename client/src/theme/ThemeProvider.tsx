@@ -1,57 +1,50 @@
-// ThemeProvider.tsx - Fixed
-import { createContext, useEffect, useState } from "react";
-import type { Theme } from "./theme";
-import { lightTheme } from "./lightTheme";
+import {
+  createContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import  { lightTheme } from "./lightTheme";
 import { darkTheme } from "./darkTheme";
 
-type ThemeName = "light" | "dark";
-type ThemeContextType = {
+
+type Theme = "light" | "dark";
+
+interface ThemeContextType {
   theme: Theme;
-  themeName: ThemeName;
   toggleTheme: () => void;
-};
+}
 
-export const ThemeContext = createContext<ThemeContextType | null>(null);
+export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [themeName, setThemeName] = useState<ThemeName>("dark"); // Changed to dark by default
+export function ThemeProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const [theme, setTheme] = useState<Theme>("light");
 
-  useEffect(() => {
-    const saved = localStorage.getItem("theme") as ThemeName | null;
-    if (saved) {
-      setThemeName(saved);
-    } else {
-      // Set dark as default if no saved preference
-      setThemeName("dark");
-    }
-  }, []);
-
-  useEffect(() => {
-    const theme = themeName === "light" ? lightTheme : darkTheme;
+  function toggleTheme() {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  }
+  useEffect(()=>{
     const root = document.documentElement;
 
-    // Apply colors to CSS variables
-    Object.entries(theme.colors).forEach(([key, value]) => {
-      root.style.setProperty(`--color-${key}`, value);
+    const currentTheme = theme === "light" ? lightTheme : darkTheme ; 
+    Object.entries(currentTheme).forEach(([key,value]) =>{
+      root.style.setProperty(`--${key}`, value)
     });
-
-    // Apply theme class to root
-    root.setAttribute("data-theme", themeName);
-    root.classList.remove("light", "dark");
-    root.classList.add(themeName);
-    
-    localStorage.setItem("theme", themeName);
-  }, [themeName]);
-
-  const toggleTheme = () => {
-    setThemeName((prev) => (prev === "light" ? "dark" : "light"));
-  };
-
-  const theme = themeName === "light" ? lightTheme : darkTheme;
+  },[theme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, themeName, toggleTheme }}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        toggleTheme,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );
-};
+}
+
