@@ -6,42 +6,43 @@ import type {
   RegisterResponse,
   MeResponse,
 } from "../../types/Auth";
-
-export const login = async (
-  username: string,
-  password: string
+interface LoginData {
+  username: string;
+  passwordHash: string;
+}
+export const loginUser = async (
+  value: LoginData
 ): Promise<LoginResponse> => {
   const { data } = await apiClient.post<LoginResponse>(
     AUTH_ENDPOINTS.LOGIN,
-    {
-      username,
-      password,
-    }
+    
+      value
+    
   );
 
   return data;
 };
+interface RegisterData {
+  name: string;
+  username: string;
+  email: string;
+  passwordHash: string;
+}
 
-export const register = async (
-  name: string,
-  username: string,
-  email: string,
-  password: string
+export const registerUser = async (
+  value: RegisterData
 ): Promise<RegisterResponse> => {
   const { data } = await apiClient.post<RegisterResponse>(
     AUTH_ENDPOINTS.REGISTER,
-    {
-      name,
-      username,
-      email,
-      password,
-    }
+    
+      value
+    
   );
 
   return data;
 };
 
-export const logout = async (): Promise<void> => {
+export const logoutUser = async (): Promise<void> => {
   await apiClient.post(AUTH_ENDPOINTS.LOGOUT);
 };
 
