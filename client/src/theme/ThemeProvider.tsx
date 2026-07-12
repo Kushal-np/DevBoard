@@ -27,14 +27,19 @@ export function ThemeProvider({
   function toggleTheme() {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   }
-  useEffect(()=>{
-    const root = document.documentElement;
+useEffect(() => {
+  const root = document.documentElement;
 
-    const currentTheme = theme === "light" ? lightTheme : darkTheme ; 
-    Object.entries(currentTheme).forEach(([key,value]) =>{
-      root.style.setProperty(`--${key}`, value)
-    });
-  },[theme]);
+  const currentTheme =
+    theme === "light" ? lightTheme : darkTheme;
+
+  Object.entries(currentTheme.colors).forEach(([key, value]) => {
+    const cssVariable =
+      "--" + key.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
+
+    root.style.setProperty(cssVariable, value);
+  });
+}, [theme]);
 
   return (
     <ThemeContext.Provider

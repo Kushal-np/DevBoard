@@ -17,6 +17,6 @@ export const lightTheme: Theme = {
     warning: "#d97706",
     link: "#2563eb",
     overlay: "rgba(0, 0, 0, 0.5)",
-    accent: "#7c3aed",
+    accent: "#28262b",
   },
 };
