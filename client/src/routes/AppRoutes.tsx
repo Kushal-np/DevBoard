@@ -10,6 +10,10 @@ import PrivateRoutes from "./PrivateRoutes";
 import PublicRoutes from "./PublicRoutes";
 import Layout from "../components/layout/LayoutFormat";
 import Feed from "../pages/Feed";
+import Settings from "../pages/Settings";
+import Bookmarks from "../pages/Bookmarks";
+import Likes from "../pages/Likes";
+import Chat from "../pages/Chat";
 
 
 const AppRoutes = () => {
@@ -30,7 +34,7 @@ const AppRoutes = () => {
                 {/* Guest only */}
                 <Route element={<PublicRoutes />}>
                     <Route
-                        path="/home"
+                        path="/"
                         element={<LandingPage />}
                     />
                     <Route
@@ -54,7 +58,10 @@ const AppRoutes = () => {
                         path="/profile"
                         element={<Profile />}
                     />
-
+                    <Route path="/settings" element={<Settings/>}/>
+                    <Route path="/bookmarks" element={<Bookmarks/>}/>
+                    <Route path="/likes" element={<Likes/>}/>
+                    <Route path="/chat" element={<Chat/>}/>
                 </Route>
 
 
