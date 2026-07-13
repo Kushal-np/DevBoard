@@ -30,6 +30,7 @@ interface AuthContextType {
   user: IUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isRegistering: boolean;
   isLogging: boolean;
   login: (data: LoginData) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
@@ -49,7 +50,7 @@ export function AuthProvider({
   const [user, setUser] = useState<IUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLogging , setIsLogging] = useState(false);
-
+  const [isRegistering , setIsRegistering] = useState(false);
   async function refreshUser() {
     try {
       const response = await getCurrentUser();
@@ -79,8 +80,14 @@ export function AuthProvider({
   }
 
   async function register(data: RegisterData) {
-    await registerUser(data);
-    await refreshUser();
+    setIsRegistering(true)
+    try{
+        await registerUser(data);
+        await refreshUser();
+    }
+    finally{
+        setIsRegistering(false);
+    }
   }
 
   async function logout() {
@@ -107,6 +114,7 @@ export function AuthProvider({
         isAuthenticated: !!user,
         isLoading,
         isLogging,
+        isRegistering,
         login,
         register,
         logout,

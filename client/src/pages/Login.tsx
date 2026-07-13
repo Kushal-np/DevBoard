@@ -202,7 +202,9 @@ const Login = () => {
             text-link
             cursor-pointer
             hover:underline
-          ">
+          "
+          onClick={()=> navigate("/register")}
+          >
             Register
           </span>
         </p>
