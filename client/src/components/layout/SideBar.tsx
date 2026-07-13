@@ -1,4 +1,4 @@
-import { LucideIcon, Home, Bookmark, Heart, MessageCircle, Settings, User, LogOut } from "lucide-react";
+import {type LucideIcon, Home, Bookmark, Heart, MessageCircle, Settings, User, LogOut } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../theme/useTheme";
