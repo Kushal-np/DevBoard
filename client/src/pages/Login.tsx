@@ -31,7 +31,7 @@ const Login = () => {
     try {
       await login(formData);
 
-      navigate("/");
+      navigate("/feed");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         setError(
