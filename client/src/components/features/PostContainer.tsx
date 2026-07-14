@@ -2,18 +2,15 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useFeed } from "../../hooks/useFeed";
-import { 
-  ExternalLink, 
-  Tag, 
-  Layers, 
-  Calendar,
+import {
+  ExternalLink,
+  Layers,
   Eye,
   Heart,
   MessageCircle,
   Share2,
   Clock,
-  User,
-  MoreHorizontal
+  MoreHorizontal,
 } from "lucide-react";
 
 export interface IPost {
@@ -52,10 +49,10 @@ const PostContainer = () => {
 
   useEffect(() => {
     if (observerRef.current) observerRef.current.disconnect();
-    
+
     observerRef.current = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && visiblePosts < (posts?.length || 0)) {
-        setVisiblePosts(prev => Math.min(prev + 3, posts?.length || 0));
+        setVisiblePosts((prev) => Math.min(prev + 3, posts?.length || 0));
       }
     });
 
@@ -75,262 +72,265 @@ const PostContainer = () => {
     if (!post) return null;
     const thumbnail = post.thumbnail || post.thumbnailUrl || post.thumbnail_url;
     if (!thumbnail) return null;
-    if (typeof thumbnail === 'string') return thumbnail;
+    if (typeof thumbnail === "string") return thumbnail;
     if (thumbnail instanceof File) {
-      try { return URL.createObjectURL(thumbnail); } 
-      catch { return null; }
+      try {
+        return URL.createObjectURL(thumbnail);
+      } catch {
+        return null;
+      }
     }
     return null;
   };
 
-  const getTagName = (tag: any): string => {
-    if (!tag) return '';
-    if (typeof tag === 'string') return tag;
-    if (typeof tag === 'object' && tag.name) return tag.name;
-    return String(tag);
-  };
-
-  const getTagCategory = (tag: any): string | null => {
-    if (!tag || typeof tag === 'string') return null;
-    if (typeof tag === 'object' && tag.category) return tag.category;
-    return null;
-  };
-
   const handleImageError = (postId: string) => {
-    setImageErrors(prev => ({ ...prev, [postId]: true }));
+    setImageErrors((prev) => ({ ...prev, [postId]: true }));
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     try {
       const date = new Date(dateString);
       const now = new Date();
       const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-      
+
       if (diff < 60) return `${diff}s`;
       if (diff < 3600) return `${Math.floor(diff / 60)}m`;
       if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
       if (diff < 604800) return `${Math.floor(diff / 86400)}d`;
-      
-      return new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
+
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
       }).format(date);
     } catch {
-      return '';
+      return "";
     }
   };
 
   const getStatusStyles = (status?: string) => {
     switch (status) {
-      case 'published': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-      case 'draft': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-      case 'archived': return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
-      default: return 'bg-surface-hover text-text-secondary border-border';
+      case "draft":
+        return "bg-warning/10 text-warning border-warning/20";
+      case "archived":
+        return "bg-danger/10 text-danger border-danger/20";
+      default:
+        return "";
     }
   };
 
   const getInitials = (name?: string) => {
-    if (!name) return '?';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    if (!name) return "?";
+    return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
-  const safePosts = Array.isArray(posts) 
-    ? posts.filter(post => post?.title && post.title.trim() !== '')
+  const safePosts = Array.isArray(posts)
+    ? posts.filter((post) => post?.title && post.title.trim() !== "")
     : [];
 
   const displayedPosts = safePosts.slice(0, visiblePosts);
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
-        <div className="relative">
-          <div className="h-12 w-12 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
-          <div className="absolute inset-0 animate-pulse rounded-full bg-primary/5 blur-xl" />
-        </div>
-        <p className="text-sm text-text-secondary/60 animate-pulse">Loading stories...</p>
+      <div className="flex flex-col divide-y divide-border/60">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="flex gap-3 px-4 py-5 md:px-1">
+            <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-surface-hover" />
+            <div className="flex-1 space-y-2.5">
+              <div className="h-3 w-32 animate-pulse rounded bg-surface-hover" />
+              <div className="h-4 w-2/3 animate-pulse rounded bg-surface-hover" />
+              <div className="h-3 w-full animate-pulse rounded bg-surface-hover" />
+              <div className="h-32 w-full animate-pulse rounded-xl bg-surface-hover" />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
   if (safePosts.length === 0) {
     return (
-      <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
-        <div className="relative">
-          <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center border border-border/30">
-            <Layers size={32} className="text-text-secondary/30" />
-          </div>
+      <div className="flex min-h-[420px] flex-col items-center justify-center gap-5 px-6 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-surface">
+          <Layers size={26} className="text-text-secondary/50" strokeWidth={1.5} />
         </div>
-        <div className="text-center">
-          <p className="text-lg font-medium text-text">No posts yet</p>
-          <p className="text-sm text-text-secondary/60 mt-1">Be the first to share your story</p>
+        <div>
+          <p className="font-display text-lg font-semibold text-text">
+            Nothing here yet
+          </p>
+          <p className="mt-1 text-sm text-text-secondary">
+            Projects shared by the community will show up in this feed.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-      <div className="w-full py-2 md:max-w-3xl md:mx-auto md:py-4">
+    <div className="w-full">
       {displayedPosts.map((post: any, index: number) => {
         const postId = getPostId(post);
         const thumbnailUrl = getThumbnailUrl(post);
         const hasImageError = imageErrors[postId];
         const showThumbnail = thumbnailUrl && !hasImageError;
         const isLast = index === displayedPosts.length - 1;
+        const statusStyle = getStatusStyles(post?.status);
 
         return (
-          <div
+          <article
             key={postId || index}
             ref={isLast ? lastPostRef : null}
-            className="group relative"
+            className="group relative border-b border-border/60 last:border-b-0"
           >
-            {/* Post Content */}
-           <div className="px-0 py-4 md:px-2 md:py-5">
+            {/* signature: accent bar draws in on hover, editor-tab style */}
+            <span className="absolute left-0 top-0 h-full w-[2px] scale-y-0 bg-primary transition-transform duration-300 ease-out group-hover:scale-y-100" />
+
+            <div className="px-4 py-5 transition-colors duration-200 md:px-5 md:group-hover:bg-surface/40">
               {/* Header */}
-              <div className="flex items-start gap-3">
-                {/* Avatar */}
+              <div className="flex items-center gap-3">
                 <div className="shrink-0">
-                  {post?.author?.profile_url ? (
+                  {post?.userId?.profile_url ? (
                     <img
-                      src={post.author.profile_url}
-                      alt={post.author.username}
-                      className="h-10 w-10 rounded-full object-cover ring-1 ring-border/30"
+                      src={post.userId?.profile_url}
+                      alt={post.userId?.username}
+                      className="h-9 w-9 rounded-full object-cover ring-1 ring-border"
                     />
                   ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-accent/20 text-xs font-medium text-primary ring-1 ring-border/30">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary ring-1 ring-border">
                       {getInitials(post?.author?.username)}
                     </div>
                   )}
                 </div>
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-text">
-                      {post?.author?.username || 'Anonymous'}
+                <div className="flex min-w-0 flex-1 items-center gap-2 font-mono text-[12.5px]">
+                  <span className="truncate font-medium text-text">
+                    {post?.userId.name || "anonymous"} 
+                  </span>
+                  <span className="text-text-secondary/40">·</span>
+                  <span className="flex shrink-0 items-center gap-1 text-text-secondary/70">
+                    <Clock size={11} />
+                    {formatDate(post?.createdAt?.toString())}
+                  </span>
+                  {post?.status && post.status !== "published" && (
+                    <span
+                      className={`ml-1 rounded-full border px-2 py-0.5 text-[10px] font-sans tracking-wide ${statusStyle}`}
+                    >
+                      {post.status}
                     </span>
-                    <span className="text-xs text-text-secondary/40">·</span>
-                    <span className="text-xs text-text-secondary/40 flex items-center gap-1">
-                      <Clock size={11} />
-                      {formatDate(post?.createdAt?.toString())}
-                    </span>
-                    {post?.status && post.status !== 'published' && (
-                      <span className={`ml-auto text-[10px] px-2 py-0.5 rounded-full border ${getStatusStyles(post.status)}`}>
-                        {post.status}
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </div>
 
-                <button className="shrink-0 rounded-full p-1.5 text-text-secondary/30 transition hover:bg-surface-hover hover:text-text-secondary">
+                <button
+                  aria-label="More options"
+                  className="shrink-0 rounded-full p-1.5 text-text-secondary/50 transition hover:bg-surface-hover hover:text-text"
+                >
                   <MoreHorizontal size={16} />
                 </button>
               </div>
 
               {/* Content */}
-              <div className="mt-3">
-                {/* Title */}
-                <h2 className="text-xl font-semibold text-text leading-snug transition-colors group-hover:text-primary">
+              <div className="mt-3 pl-12">
+                <h2 className="font-display text-[17px] font-semibold leading-snug text-text">
                   {post?.title}
                 </h2>
 
-                {/* Description */}
-                <p className="mt-2 text-sm text-text-secondary/70 leading-relaxed line-clamp-3">
+                <p className="mt-1.5 text-[14px] leading-relaxed text-text-secondary line-clamp-3">
                   {post?.description}
                 </p>
 
-                {/* Thumbnail */}
                 {showThumbnail && (
-                  <div className="mt-3 overflow-hidden rounded-xl border border-border/20 bg-background/30">
+                  <div className="mt-3 overflow-hidden rounded-xl border border-border">
                     <img
                       src={thumbnailUrl}
                       alt={post?.title}
-                      className="h-48 w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                      className="h-52 w-full object-cover"
                       onError={() => handleImageError(postId)}
                     />
                   </div>
                 )}
 
-                {/* Tech Stack */}
                 {post?.techStack && post.techStack.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-1.5">
-                    {post.techStack.slice(0, 4).map((tech: string, idx: number) => (
+                    {post.techStack.slice(0, 5).map((tech: string, idx: number) => (
                       <span
                         key={`${tech}-${idx}`}
-                        className="rounded-full bg-primary/5 px-2.5 py-0.5 text-[10px] font-mono text-primary/70 border border-primary/5"
+                        className="rounded-md border border-border bg-surface px-2 py-0.5 font-mono text-[11px] text-text-secondary"
                       >
                         {tech}
                       </span>
                     ))}
-                    {post.techStack.length > 4 && (
-                      <span className="rounded-full bg-surface-hover px-2.5 py-0.5 text-[10px] text-text-secondary/50">
-                        +{post.techStack.length - 4}
+                    {post.techStack.length > 5 && (
+                      <span className="rounded-md px-2 py-0.5 font-mono text-[11px] text-text-secondary/60">
+                        +{post.techStack.length - 5}
                       </span>
                     )}
                   </div>
                 )}
-              </div>
 
-              {/* Actions */}
-              <div className="mt-4 flex items-center gap-4">
-                <button className="flex items-center gap-1.5 text-xs text-text-secondary/50 transition hover:text-rose-400 group/btn">
-                  <Heart size={16} className="transition group-hover/btn:scale-110" />
-                  <span>{post?.starCount || 0}</span>
-                </button>
-
-                <button className="flex items-center gap-1.5 text-xs text-text-secondary/50 transition hover:text-primary">
-                  <MessageCircle size={16} />
-                  <span>0</span>
-                </button>
-
-                <button className="flex items-center gap-1.5 text-xs text-text-secondary/50 transition hover:text-primary">
-                  <Share2 size={16} />
-                </button>
-
-                <div className="ml-auto flex items-center gap-2">
-                  {post?.liveUrl && (
-                    <a
-                      href={post.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition hover:bg-primary/20"
-                    >
-                      <ExternalLink size={12} />
-                      Demo
-                    </a>
-                  )}
-                  {post?.repoUrl && (
-                    <a
-                      href={post.repoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 rounded-lg bg-surface-hover px-3 py-1.5 text-xs font-medium text-text-secondary transition hover:bg-border"
-                    >
-                      <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.15 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.62.24 2.85.12 3.15.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                      </svg>
-                      Code
-                    </a>
-                  )}
-                  <button className="rounded-lg p-1.5 text-text-secondary/30 transition hover:bg-surface-hover hover:text-primary">
-                    <Eye size={14} />
+                {/* Actions */}
+                <div className="mt-4 flex items-center gap-1">
+                  <button className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-xs text-text-secondary transition hover:bg-danger/10 hover:text-danger">
+                    <Heart size={16} strokeWidth={1.75} />
+                    <span className="font-mono">{post?.starCount || 0}</span>
                   </button>
+
+                  <button className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-xs text-text-secondary transition hover:bg-primary/10 hover:text-primary">
+                    <MessageCircle size={16} strokeWidth={1.75} />
+                    <span className="font-mono">0</span>
+                  </button>
+
+                  <button
+                    aria-label="Share"
+                    className="rounded-full p-1.5 text-text-secondary transition hover:bg-primary/10 hover:text-primary"
+                  >
+                    <Share2 size={16} strokeWidth={1.75} />
+                  </button>
+
+                  <button
+                    aria-label="Views"
+                    className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-xs text-text-secondary transition hover:bg-surface-hover"
+                  >
+                    <Eye size={16} strokeWidth={1.75} />
+                    <span className="font-mono">{post?.viewCount || 0}</span>
+                  </button>
+
+                  <div className="ml-auto flex items-center gap-2">
+                    {post?.liveUrl && (
+                      <a
+                        href={post.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white transition hover:bg-primary-hover"
+                      >
+                        <ExternalLink size={12} />
+                        Demo
+                      </a>
+                    )}
+                    {post?.repoUrl && (
+                      <a
+                        href={post.repoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-secondary transition hover:border-text-secondary/40 hover:text-text"
+                      >
+                        <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.15 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.62.24 2.85.12 3.15.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                        </svg>
+                        Code
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Horizontal line separator - except for last post */}
-            {!isLast && (
-              <div className="border-t border-border/40" />
-            )}
-          </div>
+          </article>
         );
       })}
 
-      {/* Loading more indicator */}
       {visiblePosts < safePosts.length && (
-        <div className="flex justify-center py-4">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary/20 border-t-primary/60" />
+        <div className="flex justify-center py-6">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-primary" />
         </div>
       )}
     </div>

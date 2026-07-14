@@ -32,7 +32,7 @@ const Register = () => {
 
     try {
       await register(formData);
-      navigate("/login");
+      navigate("/feed");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         setError(

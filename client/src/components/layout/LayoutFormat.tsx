@@ -1,5 +1,3 @@
-// src/components/layout/Layout.tsx
-
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import { useAuth } from "../../hooks/useAuth";
@@ -24,23 +22,19 @@ const Layout = () => {
 
   return (
     <div className="min-h-screen bg-background text-text">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
-        {/* Left Sidebar - Reduced width */}
-        <aside className="hidden md:block md:w-[220px] md:shrink-0 md:sticky md:top-0 md:h-screen md:border-r md:border-border/40">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1440px] lg:gap-8 lg:px-8">
+        <aside className="hidden md:block md:w-[240px] md:shrink-0 md:sticky md:top-0 md:h-screen md:border-r md:border-border/60">
           <Sidebar />
         </aside>
 
-        {/* Main Content - Middle - Slightly reduced */}
-       <main className="flex-1 min-w-0 w-full px-0 md:px-6 py-2 pb-24 md:py-6 md:pb-8">
+        <main className="flex-1 min-w-0 w-full pb-24 pt-0 md:pb-8 md:pt-6">
           <Outlet />
         </main>
 
-        {/* Right Sidebar - TrendBar - Increased width */}
-        <div className="hidden lg:block lg:w-[380px] lg:shrink-0">
+        <div className="hidden lg:block lg:w-[320px] lg:shrink-0">
           <TrendBar />
         </div>
 
-        {/* Mobile bottom nav */}
         <div className="md:hidden">
           <Sidebar />
         </div>

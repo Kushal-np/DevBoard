@@ -47,9 +47,9 @@ const STATUS_OPTIONS: { value: PostStatus; label: string }[] = [
 ];
 
 const STATUS_STYLES: Record<PostStatus, string> = {
-  draft: "border-warning/40 bg-warning/15 text-warning",
-  published: "border-success/40 bg-success/15 text-success",
-  archived: "border-danger/40 bg-danger/15 text-danger",
+  draft: "border-warning/30 bg-warning/10 text-warning",
+  published: "border-primary/30 bg-primary/10 text-primary",
+  archived: "border-danger/30 bg-danger/10 text-danger",
 };
 
 const TAG_CATEGORIES = [
@@ -106,30 +106,30 @@ const TagField = ({ tags, onAdd, onRemove, placeholder }: TagFieldProps) => {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-2.5 transition focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
+    <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2.5 transition focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
       {tags.map((tag, i) => (
         <span
           key={`${tag.name}-${i}`}
-          className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+          className="flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-[11px] text-text"
         >
           <span>{tag.name}</span>
-          <span className="text-[10px] text-text-secondary/60">· {tag.category}</span>
+          <span className="text-text-secondary/60">· {tag.category}</span>
           <button
             type="button"
             onClick={() => onRemove(i)}
             aria-label={`Remove ${tag.name}`}
             className="text-text-secondary transition hover:text-danger"
           >
-            <X size={12} />
+            <X size={11} />
           </button>
         </span>
       ))}
-      
+
       {!isAdding && tags.length === 0 && (
         <button
           type="button"
           onClick={() => setIsAdding(true)}
-          className="flex items-center gap-1 text-sm text-text-secondary hover:text-primary"
+          className="flex items-center gap-1 text-sm text-text-secondary transition hover:text-primary"
         >
           <Plus size={14} />
           {placeholder}
@@ -143,11 +143,8 @@ const TagField = ({ tags, onAdd, onRemove, placeholder }: TagFieldProps) => {
             onChange={(e) => setTagName(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={() => {
-              if (tagName.trim()) {
-                commit();
-              } else {
-                setIsAdding(false);
-              }
+              if (tagName.trim()) commit();
+              else setIsAdding(false);
             }}
             placeholder="Tag name..."
             className="min-w-[80px] flex-1 bg-transparent text-sm text-text placeholder:text-text-secondary focus:outline-none"
@@ -156,10 +153,10 @@ const TagField = ({ tags, onAdd, onRemove, placeholder }: TagFieldProps) => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="bg-transparent text-xs text-text-secondary focus:outline-none"
+            className="bg-transparent font-mono text-xs text-text-secondary focus:outline-none"
           >
             {TAG_CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
+              <option key={cat} value={cat} className="bg-surface text-text">
                 {cat}
               </option>
             ))}
@@ -201,11 +198,11 @@ const ChipField = ({ values, onAdd, onRemove, placeholder, mono }: ChipFieldProp
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-2.5 transition focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
+    <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2.5 transition focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
       {values.map((v, i) => (
         <span
           key={`${v}-${i}`}
-          className={`flex items-center gap-1.5 rounded-lg bg-surface-hover px-2.5 py-1 text-xs font-medium text-text ${
+          className={`flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1 text-xs text-text ${
             mono ? "font-mono" : ""
           }`}
         >
@@ -216,7 +213,7 @@ const ChipField = ({ values, onAdd, onRemove, placeholder, mono }: ChipFieldProp
             aria-label={`Remove ${v}`}
             className="text-text-secondary transition hover:text-danger"
           >
-            <X size={12} />
+            <X size={11} />
           </button>
         </span>
       ))}
@@ -251,7 +248,7 @@ const ActionIcon = ({ icon, active, onClick, label }: ActionIconProps) => (
     aria-label={label}
     className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
       active
-        ? "bg-primary/15 text-primary"
+        ? "bg-primary/10 text-primary"
         : "text-text-secondary hover:bg-surface-hover hover:text-primary"
     }`}
   >
@@ -325,13 +322,11 @@ const PostContent = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       notify("error", "Please select an image file.");
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       notify("error", "Image size must be less than 5MB.");
       return;
@@ -340,7 +335,6 @@ const PostContent = () => {
     setThumbnailFile(file);
     setThumbnailError(false);
 
-    // Create preview URL
     const reader = new FileReader();
     reader.onloadend = () => {
       setThumbnailPreview(reader.result as string);
@@ -350,39 +344,38 @@ const PostContent = () => {
 
   const canSubmit = form.title.trim().length > 0 && form.description.trim().length > 0;
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  if (!canSubmit || isLoading) return;
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!canSubmit || isLoading) return;
 
-  try {
-    const formData = new FormData();
-    formData.append('title', form.title);
-    formData.append('description', form.description);
-    formData.append('liveUrl', form.liveUrl || '');
-    formData.append('repoUrl', form.repoUrl || '');
-    formData.append('status', form.status);
-    formData.append('techStack', JSON.stringify(techStack));
-    formData.append('tags', JSON.stringify(tags));
-    
-    if (thumbnailFile) {
-      formData.append('thumbnail', thumbnailFile);
+    try {
+      const formData = new FormData();
+      formData.append("title", form.title);
+      formData.append("description", form.description);
+      formData.append("liveUrl", form.liveUrl || "");
+      formData.append("repoUrl", form.repoUrl || "");
+      formData.append("status", form.status);
+      formData.append("techStack", JSON.stringify(techStack));
+      formData.append("tags", JSON.stringify(tags));
+
+      if (thumbnailFile) {
+        formData.append("thumbnail", thumbnailFile);
+      }
+
+      await CreatePost(formData);
+
+      notify("success", "Your project is live.");
+
+      setTimeout(() => {
+        getPosts();
+      }, 1000);
+
+      resetAll();
+    } catch (err) {
+      console.error(err);
+      notify("error", "Couldn't post right now. Try again.");
     }
-
-    await CreatePost(formData);
-
-    notify("success", "Your project is live.");
-
-    // Force a re-fetch of posts after a delay
-    setTimeout(() => {
-      getPosts(); // Make sure getPosts is available from useFeed
-    }, 1000);
-
-    resetAll();
-  } catch (err) {
-    console.error(err);
-    notify("error", "Couldn't post right now. Try again.");
-  }
-};
+  };
 
   const removeThumbnail = () => {
     setThumbnailFile(null);
@@ -393,8 +386,10 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
   return (
     <div
-      className={`relative w-full rounded-2xl border bg-surface p-3 md:max-w-2xl md:mx-auto md:p-4 transition-all duration-300 sm:p-5 ${
-        isExpanded ? "border-primary/30 shadow-lg shadow-primary/[0.06]" : "border-border shadow-sm"
+      className={`relative w-full rounded-none border-x-0 border-b border-t-0 bg-surface p-4 transition-all duration-300 md:rounded-2xl md:border md:p-5 ${
+        isExpanded
+          ? "border-primary/30 md:shadow-[0_0_0_1px_rgba(91,127,255,0.10)]"
+          : "border-border"
       }`}
     >
       {isExpanded && (
@@ -410,8 +405,10 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
       {feedback && (
         <div
-          className={`mb-3 rounded-lg px-3 py-2 text-xs font-medium transition ${
-            feedback.type === "success" ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
+          className={`mb-3 rounded-lg px-3 py-2 text-xs font-medium ${
+            feedback.type === "success"
+              ? "bg-success/10 text-success"
+              : "bg-danger/10 text-danger"
           }`}
         >
           {feedback.message}
@@ -419,23 +416,22 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       )}
 
       <form onSubmit={handleSubmit}>
-        {/* Avatar + title */}
         <div className="flex items-start gap-3">
           <div className="mt-0.5 shrink-0">
             {user?.profile_url ? (
               <img
                 src={user.profile_url}
                 alt=""
-                className="h-11 w-11 rounded-full object-cover ring-2 ring-border"
+                className="h-10 w-10 rounded-full object-cover ring-1 ring-border"
               />
             ) : (
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-background ring-2 ring-border">
-                <User size={20} />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary ring-1 ring-border">
+                <User size={18} />
               </div>
             )}
           </div>
 
-          <div className="min-w-0 flex-1 pt-1.5">
+          <div className="min-w-0 flex-1 pt-1">
             <textarea
               ref={titleRef}
               name="title"
@@ -454,19 +450,18 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
               }}
               placeholder="Share what you're building…"
               rows={1}
-              className="w-full resize-none overflow-hidden bg-transparent text-lg font-medium leading-snug text-text placeholder:text-text-secondary/70 focus:outline-none"
+              className="w-full resize-none overflow-hidden bg-transparent font-display text-[17px] font-medium leading-snug text-text placeholder:font-sans placeholder:font-normal placeholder:text-text-secondary/70 focus:outline-none"
             />
           </div>
         </div>
 
-        {/* Expandable section */}
         <div
           className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
             isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
           }`}
         >
           <div className="overflow-hidden">
-            <div className="flex flex-col gap-4 pb-1 pt-3 sm:pl-14">
+            <div className="flex flex-col gap-4 pb-1 pt-3 sm:pl-[52px]">
               <div>
                 <textarea
                   ref={descRef}
@@ -483,7 +478,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                 />
                 <div className="mt-1 flex justify-end">
                   <span
-                    className={`text-xs tabular-nums ${
+                    className={`font-mono text-[11px] tabular-nums ${
                       form.description.length > DESCRIPTION_LIMIT - 40
                         ? "text-warning"
                         : "text-text-secondary"
@@ -496,7 +491,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
               {(showThumbnail || thumbnailFile || thumbnailPreview) && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 transition focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
+                  <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2.5 transition focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
                     <ImageIcon size={16} className="shrink-0 text-text-secondary" />
                     <input
                       ref={fileInputRef}
@@ -509,7 +504,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   </div>
 
                   {thumbnailPreview && !thumbnailError && (
-                    <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-background">
+                    <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border bg-background">
                       <img
                         src={thumbnailPreview}
                         alt="Thumbnail preview"
@@ -520,7 +515,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                         type="button"
                         onClick={removeThumbnail}
                         aria-label="Remove thumbnail"
-                        className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-overlay text-background backdrop-blur transition hover:bg-danger"
+                        className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-overlay text-white backdrop-blur transition hover:bg-danger"
                       >
                         <X size={14} />
                       </button>
@@ -528,38 +523,43 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   )}
 
                   {thumbnailError && (
-                    <p className="text-xs text-danger">Couldn't load the image. Please try another file.</p>
+                    <p className="text-xs text-danger">
+                      Couldn't load the image. Please try another file.
+                    </p>
                   )}
 
                   {thumbnailFile && !thumbnailError && !thumbnailPreview && (
-                    <p className="text-xs text-text-secondary">
-                      Selected: {thumbnailFile.name} ({(thumbnailFile.size / 1024).toFixed(1)} KB)
+                    <p className="font-mono text-xs text-text-secondary">
+                      {thumbnailFile.name} ({(thumbnailFile.size / 1024).toFixed(1)} KB)
                     </p>
                   )}
                 </div>
               )}
 
               {(showLiveUrl || form.liveUrl) && (
-                <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 transition focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
+                <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2.5 transition focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
                   <Link2 size={16} className="shrink-0 text-text-secondary" />
                   <input
                     name="liveUrl"
                     value={form.liveUrl}
                     onChange={handleChange}
                     placeholder="Live demo URL"
-                    className="flex-1 bg-transparent text-sm text-text placeholder:text-text-secondary focus:outline-none"
+                    className="flex-1 bg-transparent font-mono text-sm text-text placeholder:font-sans placeholder:text-text-secondary focus:outline-none"
                   />
                 </div>
               )}
 
               {(showRepoUrl || form.repoUrl) && (
-                <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 transition focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
+                <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2.5 transition focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
+                  <svg className="h-4 w-4 shrink-0 text-text-secondary" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.15 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.62.24 2.85.12 3.15.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                  </svg>
                   <input
                     name="repoUrl"
                     value={form.repoUrl}
                     onChange={handleChange}
                     placeholder="GitHub repository URL"
-                    className="flex-1 bg-transparent text-sm text-text placeholder:text-text-secondary focus:outline-none"
+                    className="flex-1 bg-transparent font-mono text-sm text-text placeholder:font-sans placeholder:text-text-secondary focus:outline-none"
                   />
                 </div>
               )}
@@ -618,11 +618,10 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
           </div>
         </div>
 
-        {/* Toolbar */}
         <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
           <div className="flex items-center gap-0.5">
             <ActionIcon
-              icon={<ImageIcon size={18} />}
+              icon={<ImageIcon size={18} strokeWidth={1.75} />}
               active={showThumbnail || !!thumbnailFile}
               onClick={() => {
                 setIsExpanded(true);
@@ -634,7 +633,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
               label="Add thumbnail"
             />
             <ActionIcon
-              icon={<Link2 size={18} />}
+              icon={<Link2 size={18} strokeWidth={1.75} />}
               active={showLiveUrl || !!form.liveUrl}
               onClick={() => {
                 setIsExpanded(true);
@@ -642,15 +641,14 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
               }}
               label="Add live URL"
             />
-
             <ActionIcon
-              icon={<Layers size={18} />}
+              icon={<Layers size={18} strokeWidth={1.75} />}
               active={techStack.length > 0}
               onClick={() => setIsExpanded(true)}
               label="Tech stack"
             />
             <ActionIcon
-              icon={<Tag size={18} />}
+              icon={<Tag size={18} strokeWidth={1.75} />}
               active={tags.length > 0}
               onClick={() => setIsExpanded(true)}
               label="Tags"
@@ -660,7 +658,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
           <button
             type="submit"
             disabled={!canSubmit || isLoading}
-            className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-background transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isLoading && <Loader2 size={15} className="animate-spin" />}
             {isLoading ? "Posting…" : "Post"}
