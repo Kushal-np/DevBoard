@@ -50,7 +50,7 @@ const userSchema = new mongoose.Schema<IUser>({
     },
     cover_url: {
         type: String,
-        default: " ",
+        default: "https://wallpapercave.com/wp/wp12665288.jpg",
     },
     socialMedia: {
         github: {

@@ -46,7 +46,7 @@ const projectSchema = new mongoose.Schema<IProject>({
     stars:[
         {
             type: Schema.Types.ObjectId , 
-            ref:"star"
+            ref:"Star"
         }
     ],
     starCount:{
