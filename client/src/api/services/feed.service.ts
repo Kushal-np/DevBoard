@@ -26,7 +26,6 @@ interface PostResponse {
   Projects: IPost;
 }
 
-// Updated to accept FormData
 export const createPost = async (formData: FormData): Promise<PostResponse> => {
   const { data } = await apiClient.post<PostResponse>(
     POST_ENDPOINTS.CREATE_POST,
@@ -62,5 +61,20 @@ export const getIndividualPost = async (value: string): Promise<IndividualPostRe
   const { data } = await apiClient.get<IndividualPostResponse>(
     POST_ENDPOINTS.GET_INDIVIDUAL_POST(value)
   );
+  return data;
+};
+
+
+interface StarResponse{
+    success:boolean ; 
+    starred : boolean;
+    starCount: number ; 
+    message:string;
+}
+export const LikePost = async (value: string): Promise<StarResponse> => {
+  const { data } = await apiClient.post<StarResponse>(
+    POST_ENDPOINTS.STAR_POST(value)
+  );
+
   return data;
 };

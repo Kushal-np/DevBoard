@@ -8,12 +8,11 @@ import {
 } from "react";
 
 import type { IPost } from "../types/Post";
-
 import {
   createPost,
   GetPost,
   getIndividualPost,
-  type PostData,
+  LikePost,
 } from "../api/services/feed.service";
 
 interface FeedContextType {
@@ -24,6 +23,7 @@ interface FeedContextType {
   CreatePost: (data: FormData) => Promise<void>;
   getPosts: () => Promise<void>;
   getPostById: (id: string) => Promise<void>;
+  Likepost: (id: string) => Promise<void>;
 }
 
 export const FeedContext = createContext<FeedContextType | undefined>(
@@ -45,10 +45,11 @@ export function FeedProvider({
 
       const res = await GetPost();
 
-      // Handle both array and single object responses
       if (Array.isArray(res.Projects)) {
-        // Filter out any posts without a title or with empty titles
-        const validPosts = res.Projects.filter(post => post.title && post.title.trim() !== '');
+        const validPosts = res.Projects.filter(
+          (post) => post.title && post.title.trim() !== ""
+        );
+
         setPosts(validPosts);
       } else if (res.Projects) {
         setPosts([res.Projects]);
@@ -67,47 +68,44 @@ export function FeedProvider({
     try {
       setIsLoading(true);
 
-      // Create an optimistic post with a temporary ID
-      const title = formData.get('title') as string || 'Untitled';
-      const description = formData.get('description') as string || '';
-      
+      const title = (formData.get("title") as string) || "Untitled";
+      const description =
+        (formData.get("description") as string) || "";
+
       const optimisticPost: IPost = {
         _id: `temp-${Date.now()}`,
-        userId: '',
-        title: title,
-        description: description,
-        liveUrl: formData.get('liveUrl') as string || '',
-        repoUrl: formData.get('repoUrl') as string || '',
+        userId: "",
+        title,
+        description,
+        liveUrl: (formData.get("liveUrl") as string) || "",
+        repoUrl: (formData.get("repoUrl") as string) || "",
         techStack: [],
         tags: [],
-        thumbnailUrl: '/api/placeholder/400/200', // Placeholder while loading
+        thumbnailUrl: "",
         stars: [],
         starCount: 0,
         viewCount: 0,
-        status: 'draft',
+        status: "draft",
         featured: false,
+        isLiked: false,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
-      // Add optimistic post immediately
-      if (title && title.trim() !== '') {
-        setPosts((prev) => [optimisticPost, ...prev]);
-      }
+      setPosts((prev) => [optimisticPost, ...prev]);
 
-      // Send the actual request
-      const res = await createPost(formData);
+      await createPost(formData);
 
-      // Re-fetch posts to get the complete data including thumbnail
-      // Wait a bit for the backend to process the image
       setTimeout(() => {
         getPosts();
       }, 500);
-
     } catch (error) {
       console.error(error);
-      // Remove the optimistic post on error
-      setPosts((prev) => prev.filter(post => !post._id.toString().startsWith('temp-')));
+
+      setPosts((prev) =>
+        prev.filter((post) => !post._id.startsWith("temp-"))
+      );
+
       throw error;
     } finally {
       setIsLoading(false);
@@ -128,6 +126,38 @@ export function FeedProvider({
     }
   };
 
+const Likepost = async (id: string) => {
+  try {
+    const res = await LikePost(id);
+
+    // Update the feed
+    setPosts((prev) =>
+      prev.map((post) =>
+        post._id === id
+          ? {
+              ...post,
+              starCount: res.starCount,
+              isLiked: res.starred,
+            }
+          : post
+      )
+    );
+
+    // Update the currently opened post
+    setCurrentPost((prev) => {
+      if (!prev || prev._id !== id) return prev;
+
+      return {
+        ...prev,
+        starCount: res.starCount,
+        isLiked: res.starred,
+      };
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
   return (
     <FeedContext.Provider
       value={{
@@ -137,6 +167,7 @@ export function FeedProvider({
         CreatePost,
         getPosts,
         getPostById,
+        Likepost,
       }}
     >
       {children}
