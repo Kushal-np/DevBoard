@@ -2,6 +2,7 @@ import { useTheme } from "../../theme/useTheme";
 
 const ThemeController = () => {
     const { theme, toggleTheme } = useTheme();
+    //Context
 
     const isDark = theme === "dark";
 
