@@ -12,6 +12,7 @@ import {
     Clock,
     MoreHorizontal,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export interface IPost {
     _id: string;
@@ -188,20 +189,20 @@ const PostContainer = () => {
 
                         <div className="px-4 py-5 transition-colors duration-200 md:px-5 md:group-hover:bg-surface/40">
                             {/* Header */}
-                            <div className="flex items-center gap-3">
-                                <div className="shrink-0">
+                            <div className="flex items-center gap-3"> 
+                                <Link to={`/profile/${post?.userId?.username}`} className="shrink-0">
                                     {post?.userId?.profile_url ? (
                                         <img
-                                            src={post.userId?.profile_url}
-                                            alt={post.userId?.username}
+                                            src={post.userId.profile_url}
+                                            alt={post.userId.username}
                                             className="h-9 w-9 rounded-full object-cover ring-1 ring-border"
                                         />
                                     ) : (
                                         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary ring-1 ring-border">
-                                            {getInitials(post?.author?.username)}
+                                            {getInitials(post?.userId?.name)}
                                         </div>
                                     )}
-                                </div>
+                                </Link>
 
                                 <div className="flex min-w-0 flex-1 items-center gap-2 font-mono text-[12.5px]">
                                     <span className="truncate font-medium text-text">
@@ -274,8 +275,8 @@ const PostContainer = () => {
                                         <button
                                             onClick={() => Likepost(post._id)}
                                             className={`flex items-center gap-1.5 rounded-full px-2 py-1.5 text-xs transition ${post.isLiked
-                                                    ? "text-red-500"
-                                                    : "text-text-secondary hover:bg-danger/10 hover:text-danger"
+                                                ? "text-red-500"
+                                                : "text-text-secondary hover:bg-danger/10 hover:text-danger"
                                                 }`}
                                         >
                                             <Heart
