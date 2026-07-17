@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 import {
   Mail,
   AtSign,
@@ -7,13 +9,21 @@ import {
   Edit3,
   Code2,
 } from "lucide-react";
-
 import { useAuth } from "../hooks/useAuth";
+import { useProfile } from "../hooks/useProfile";
 
 const Profile = () => {
+  const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
+  const { userProfile, isLoading, profileData } = useProfile();
+  console.log(userProfile)
+  useEffect(() => {
+    if (username) {
+      profileData(username);
+    }
+  }, [username]);
 
-  if (!user) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-text">
         Loading...
@@ -21,14 +31,24 @@ const Profile = () => {
     );
   }
 
+  if (!userProfile) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background text-text">
+        User not found.
+      </div>
+    );
+  }
+
+  const isMyProfile = !!user && user._id === userProfile._id;
+
   return (
     <div className="min-h-screen bg-background text-text">
 
       {/* Cover */}
       <div className="relative h-80 w-full overflow-hidden">
-        {user.cover_url ? (
+        {userProfile.cover_url ? (
           <img
-            src={user.cover_url}
+            src={userProfile.cover_url}
             className="h-full w-full object-cover"
             alt="cover"
           />
@@ -66,10 +86,10 @@ const Profile = () => {
 
               {/* Avatar */}
               <div>
-                {user.profile_url ? (
+                {userProfile.profile_url ? (
                   <img
-                    src={user.profile_url}
-                    alt={user.username}
+                    src={userProfile.profile_url}
+                    alt={userProfile.username}
                     className="
                     h-40
                     w-40
@@ -95,7 +115,7 @@ const Profile = () => {
                     text-background
                     "
                   >
-                    {user.name[0]}
+                    {userProfile.name?.[0] ?? "?"}
                   </div>
                 )}
               </div>
@@ -105,24 +125,24 @@ const Profile = () => {
               <div>
 
                 <h1 className="text-4xl font-bold">
-                  {user.name}
+                  {userProfile.name}
                 </h1>
 
 
                 <p className="mt-2 flex items-center gap-2 text-text-secondary">
                   <AtSign size={16}/>
-                  {user.username}
+                  {userProfile.username}
                 </p>
 
 
                 <p className="mt-1 flex items-center gap-2 text-text-secondary">
                   <Mail size={16}/>
-                  {user.email}
+                  {userProfile.email}
                 </p>
 
 
                 <p className="mt-5 max-w-xl text-text-secondary">
-                  {user.bio ||
+                  {userProfile.bio ||
                     "Developer building cool things and contributing to the community."}
                 </p>
 
@@ -133,24 +153,45 @@ const Profile = () => {
 
 
 
-            <button
-              className="
-              flex
-              items-center
-              gap-2
-              rounded-xl
-              bg-primary
-              px-5
-              py-3
-              font-medium
-              text-background
-              transition
-              hover:bg-primary-hover
-              "
-            >
-              <Edit3 size={18}/>
-              Edit Profile
-            </button>
+            {isMyProfile ? (
+              <button
+                className="
+                flex
+                items-center
+                gap-2
+                rounded-xl
+                bg-primary
+                px-5
+                py-3
+                font-medium
+                text-background
+                transition
+                hover:bg-primary-hover
+                "
+              >
+                <Edit3 size={18}/>
+                Edit Profile
+              </button>
+            ) : (
+              <button
+                className="
+                flex
+                items-center
+                gap-2
+                rounded-xl
+                bg-primary
+                px-5
+                py-3
+                font-medium
+                text-background
+                transition
+                hover:bg-primary-hover
+                "
+              >
+                <UserPlus size={18}/>
+                Follow
+              </button>
+            )}
 
 
           </div>
@@ -170,12 +211,12 @@ const Profile = () => {
 
             <Stat
               title="Followers"
-              value={user.followerCount}
+              value={userProfile.followerCount}
             />
 
             <Stat
               title="Following"
-              value={user.followingCount}
+              value={userProfile.followingCount}
             />
 
             <Stat
@@ -231,13 +272,13 @@ const Profile = () => {
 
               <p className="flex gap-3">
                 <Users size={18}/>
-                {user.followers.length} Followers
+                {userProfile.followers?.length ?? 0} Followers
               </p>
 
 
               <p className="flex gap-3">
                 <UserPlus size={18}/>
-                {user.following.length} Following
+                {userProfile.following?.length ?? 0} Following
               </p>
 
             </div>

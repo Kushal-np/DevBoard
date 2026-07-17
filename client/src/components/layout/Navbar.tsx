@@ -76,7 +76,7 @@ const Navbar = () => {
                 </Link>
 
                 <Link
-                  to="/profile"
+                  to={`/profile/${user?.username}`}
                   className="
                     flex h-11 w-11 items-center justify-center overflow-hidden
                     rounded-full border border-border bg-primary text-background
@@ -151,7 +151,7 @@ const Navbar = () => {
                   Dashboard
                 </Link>
                 <Link
-                  to="/profile"
+                  to={`/profile/${user?.username}`}
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-text"
                 >

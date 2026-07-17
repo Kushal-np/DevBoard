@@ -59,7 +59,7 @@ const Sidebar = () => {
         <div className="flex-1" />
 
         <NavLink
-          to="/profile"
+          to={`/profile/${user?.username}`}
           className="flex items-center gap-3 rounded-xl border border-border bg-background p-2.5 transition hover:border-text-secondary/30"
         >
           {user?.profile_url ? (
@@ -118,7 +118,7 @@ const Sidebar = () => {
         })}
 
         <NavLink
-          to="/profile"
+          to={`/profile/${user?.username}`}
           className={({ isActive }: { isActive: boolean }) =>
             `relative flex flex-1 flex-col items-center justify-center gap-0.5 py-2 ${
               isActive ? "text-primary" : "text-text-secondary/70"
