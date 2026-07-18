@@ -13,6 +13,7 @@ import Settings from "../pages/Settings";
 import Bookmarks from "../pages/Bookmarks";
 import Likes from "../pages/Likes";
 import Chat from "../pages/Chat";
+import HomeRedirect from "../components/features/HomeRedirect";
 
 
 const AppRoutes = () => {
@@ -23,7 +24,7 @@ const AppRoutes = () => {
 
         {/* Guest only */}
         <Route element={<PublicRoutes />}>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<HomeRedirect />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
