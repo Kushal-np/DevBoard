@@ -6,6 +6,7 @@ import generateToken from "../utils/generateToken";
 
 import { IUserResponse } from "../interfaces/Response";
 import { IAuthResponse } from "../interfaces/Response/AuthResponse";
+import Follow from "../models/follow.model";
 
 export const register = async (
     req: Request,
@@ -310,3 +311,35 @@ try {
     });
   }
 };
+
+export const getFollowData = async(req:Request , res:Response) =>{
+    try{
+        const userId = req.user?._id;
+        if(!userId){
+            return res.status(401).json({
+                message:"Unathourized"
+            });
+        }
+        const following = await Follow.find({
+            followerId:userId , 
+        }).select("followingId").lean();
+        const followers = await Follow.find({
+            followingId:userId , 
+        }).select("followerId").lean();
+
+        return res.status(200).json({
+            following: following.map((item)=>{item.followingId.toString()}),
+            followers: followers.map((item)=>{item.followerId.toString()})
+        });
+    }
+    catch(error){
+        console.error(
+            "Get follow data error" , 
+            error,
+        );
+
+        return res.status(500).json({
+            message:"Internal server error" , 
+        });
+    }
+}
