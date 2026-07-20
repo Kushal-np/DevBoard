@@ -88,6 +88,7 @@ export const register = async (
 export const login = async (req: Request, res: Response) => {
     try {
         const { username, passwordHash } = req.body;
+        console.log("hello world")
         if (!username || !passwordHash) {
             res.status(400).json({
                 success: false,
@@ -311,35 +312,40 @@ try {
     });
   }
 };
+export const getFollowData = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
 
-export const getFollowData = async(req:Request , res:Response) =>{
-    try{
-        const userId = req.user?._id;
-        if(!userId){
-            return res.status(401).json({
-                message:"Unathourized"
-            });
-        }
-        const following = await Follow.find({
-            followerId:userId , 
-        }).select("followingId").lean();
-        const followers = await Follow.find({
-            followingId:userId , 
-        }).select("followerId").lean();
-
-        return res.status(200).json({
-            following: following.map((item)=>{item.followingId.toString()}),
-            followers: followers.map((item)=>{item.followerId.toString()})
-        });
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "User id required",
+      });
     }
-    catch(error){
-        console.error(
-            "Get follow data error" , 
-            error,
-        );
 
-        return res.status(500).json({
-            message:"Internal server error" , 
-        });
+    const user = await User.findById(id)
+      .select("followers following")
+      .populate("followers", "name username profile_url")
+      .populate("following", "name username profile_url")
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
-}
+
+    return res.status(200).json({
+      success: true,
+      following: user.following,
+      followers: user.followers,
+    });
+  } catch (error) {
+    console.error("Get follow data error", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};

@@ -1,7 +1,7 @@
 import express from "express";
 import {Router} from "express";
 import upload from "../middleware/upload.middleware";
-import { createPost, getFeed, getPosts, getPostsById, starPost } from "../controllers/project.controller";
+import { createPost, getFeed, getPosts, getPostsById, getStarredPost, starPost } from "../controllers/project.controller";
 import { authMiddleware } from "../middleware/auth.middleware";
 const router = express.Router();
 
@@ -10,5 +10,6 @@ router.get("/get-post" , authMiddleware , getPosts);
 router.get("/get-post/:id" , authMiddleware , getPostsById);
 router.get("/getFeed" , authMiddleware , getFeed );
 router.post("/:id/star", authMiddleware , starPost);
+router.get("/star" , authMiddleware, getStarredPost);
 
 export default router;

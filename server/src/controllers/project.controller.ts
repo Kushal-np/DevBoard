@@ -286,3 +286,47 @@ export const starPost = async (
     });
   }
 };
+
+export const getStarredPost = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.user?._id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+      return;
+    }
+
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const projects = await Project.find({ stars: userId })
+      .populate({
+        path: "userId",
+        select: "username name bio profile_url",
+        model: "User",
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      success: true,
+      projects,
+      message: "Starred posts fetched successfully",
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};

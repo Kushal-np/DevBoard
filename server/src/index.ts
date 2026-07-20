@@ -22,6 +22,10 @@ app.use(express.urlencoded({extended:true}))
 app.use("/api/user" , userRoutes);
 app.use("/api/profile" , profileRoutes );
 app.use("/api/project" , projectRoutes )
+app.get("/ping", (req, res) => {
+  console.log("PING HIT");
+  res.send("pong");
+});
 app.listen(PORT , ()=>{
     console.log(`server running on port ${PORT}`);
     connectDB();
