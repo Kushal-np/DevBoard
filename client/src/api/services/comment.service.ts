@@ -28,5 +28,5 @@ export const deleteComment = async (id: string): Promise<{ success: boolean }> =
 };
 
 export const nestedComment = () =>{
-  
+  return data;
 }
