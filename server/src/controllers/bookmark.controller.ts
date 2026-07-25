@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import Bookmark from "../models/bookmark.model";
 
-// POST /api/bookmark/:id  -> toggles bookmark on/off (same pattern as starPost)
 export const bookmarkPost = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
@@ -14,7 +13,7 @@ export const bookmarkPost = async (req: Request, res: Response): Promise<void> =
 
     const existing = await Bookmark.findOne({ userId, projectId: id });
 
-    if (existing) {
+    if (existing) { 
       await existing.deleteOne();
       res.status(200).json({ success: true, bookmarked: false, message: "Removed from bookmarks" });
       return;
@@ -28,7 +27,6 @@ export const bookmarkPost = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-// GET /api/bookmark
 export const getBookmarkPosts = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
@@ -52,7 +50,6 @@ export const getBookmarkPosts = async (req: Request, res: Response): Promise<voi
   }
 };
 
-// DELETE /api/bookmark/:id
 export const deleteFromBookmarks = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
