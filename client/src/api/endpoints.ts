@@ -27,7 +27,7 @@ export const POST_ENDPOINTS = {
     GET_STARRED: `project/star`,
     GET_FEATURED: `project/featured`,
     GET_EXPLORE: `project/explore`,
-}
+}// api endpoints
 
 export const BOOKMARK_ENDPOINTS = {
     GET_ALL: `/bookmark`,
