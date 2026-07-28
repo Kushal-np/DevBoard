@@ -16,7 +16,7 @@ export const FOLLOW_ENDPOINTS = {
 
 export const PROFILE_ENDPOINTS = {
     GET_PROFILE: (username: string) => `/profile/${username}`,
-}
+}//point
 
 export const POST_ENDPOINTS = {
     CREATE_POST: `project/create-post`,
