@@ -15,3 +15,5 @@ export const searchByTag = async (tag: string) => {
   const { data } = await apiClient.get(SEARCH_ENDPOINTS.TAGS, { params: { tag } });
   return data;
 };
+
+//endpoints on the endpoint file 
