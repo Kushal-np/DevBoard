@@ -71,7 +71,7 @@ const Likes = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="font-semibold text-gray-900 truncate group-hover:underline">
-                    {post.title}
+                    {post.title} 
                   </h3>
                   <span
                     className={

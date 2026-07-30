@@ -14,6 +14,7 @@ import Bookmarks from "../pages/Bookmarks";
 import Likes from "../pages/Likes";
 import Chat from "../pages/Chat";
 import HomeRedirect from "../components/features/HomeRedirect";
+import Post from "../pages/Post";
 
 
 const AppRoutes = () => {
@@ -37,6 +38,7 @@ const AppRoutes = () => {
           <Route path="/likes" element={<Likes />} />
           <Route path="/profile/:username" element={<Profile />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/post/:postId" element={<Post/>}/>
         </Route>
 
       </Route>

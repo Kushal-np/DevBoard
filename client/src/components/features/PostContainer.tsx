@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useBookmark } from "../../hooks/useBookmark";
+import CommentModal from "../Comment/Comment";
 
 export interface IPost {
     _id: string;
@@ -42,6 +43,7 @@ const PostContainer = () => {
     const { posts, getPosts, isLoading, Likepost } = useFeed();
     const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
     const [visiblePosts, setVisiblePosts] = useState<number>(5);
+    const [isCommentOpen , setIsCommentOpen] = useState<boolean>(false);
     const observerRef = useRef<IntersectionObserver | null>(null);
     const lastPostRef = useRef<HTMLDivElement | null>(null);
     const {toggle} = useBookmark();
@@ -69,7 +71,13 @@ const PostContainer = () => {
         if (!post) return `post-${Math.random()}`;
         return post._id || post.id || `post-${Math.random()}`;
     };
-
+    if (isCommentOpen == true){
+        return(
+            <div className="h-[100vh]">
+                <CommentModal/>
+            </div>
+        )
+    }
     const getThumbnailUrl = (post: any): string | null => {
         if (!post) return null;
         const thumbnail = post.thumbnail || post.thumbnailUrl || post.thumbnail_url;
@@ -290,6 +298,10 @@ const PostContainer = () => {
                                     </button>
                                         <button onClick={()=>{toggle(post._id)}}>
                                             Bookmark
+                                        </button>
+
+                                        <button onClick={()=>{setIsCommentOpen(!isCommentOpen)}}>
+                                            Comment
                                         </button>
                                     <button className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-xs text-text-secondary transition hover:bg-primary/10 hover:text-primary">
                                         <MessageCircle size={16} strokeWidth={1.75} />
