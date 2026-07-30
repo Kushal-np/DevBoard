@@ -5,6 +5,7 @@ import connectDB from "./config/db";
 import userRoutes from "./routes/user.routes";
 import profileRoutes from "./routes/profile.routes";
 import projectRoutes from "./routes/project.routes"
+import bookmarkRoutes from "./routes/bookmark.routes"
 import cookieParser from "cookie-parser";
 dotenv.config();
 const app = express() ;
@@ -22,6 +23,7 @@ app.use(express.urlencoded({extended:true}))
 app.use("/api/user" , userRoutes);
 app.use("/api/profile" , profileRoutes );
 app.use("/api/project" , projectRoutes )
+app.use("/api/bookmark" , bookmarkRoutes);
 app.get("/ping", (req, res) => {
   console.log("PING HIT");
   res.send("pong");

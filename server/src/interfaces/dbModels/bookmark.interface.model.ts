@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 
 export interface IBookmark {
   userId: Types.ObjectId;
@@ -6,3 +6,5 @@ export interface IBookmark {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type BookmarkDocument = HydratedDocument<IBookmark>;
