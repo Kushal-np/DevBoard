@@ -2,9 +2,7 @@ import { useEffect } from "react";
 import { useBookmark } from "../hooks/useBookmark";
 import PostContainer from "../components/features/PostContainer";
 
-// Reuses PostContainer's card UI by just feeding it bookmarked posts.
-// Simplest skeleton: render title/description list; swap in PostContainer's
-// card markup once you're happy with the data flow.
+
 const Bookmarks = () => {
   const { bookmarks, isLoading, fetchBookmarks } = useBookmark();
 

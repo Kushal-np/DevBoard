@@ -13,6 +13,7 @@ import {
     MoreHorizontal,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useBookmark } from "../../hooks/useBookmark";
 
 export interface IPost {
     _id: string;
@@ -43,7 +44,7 @@ const PostContainer = () => {
     const [visiblePosts, setVisiblePosts] = useState<number>(5);
     const observerRef = useRef<IntersectionObserver | null>(null);
     const lastPostRef = useRef<HTMLDivElement | null>(null);
-
+    const {toggle} = useBookmark();
     useEffect(() => {
         getPosts();
     }, []);
@@ -287,7 +288,9 @@ const PostContainer = () => {
                                             <span className="font-mono">{post.starCount}</span>
                                         </button>
                                     </button>
-
+                                        <button onClick={()=>{toggle(post._id)}}>
+                                            Bookmark
+                                        </button>
                                     <button className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-xs text-text-secondary transition hover:bg-primary/10 hover:text-primary">
                                         <MessageCircle size={16} strokeWidth={1.75} />
                                         <span className="font-mono">0</span>
