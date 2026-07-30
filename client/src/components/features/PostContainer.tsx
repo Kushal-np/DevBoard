@@ -176,193 +176,430 @@ const PostContainer = () => {
             </div>
         );
     }
+return (
+    <div className="w-full max-w-2xl mx-auto space-y-4">
 
-    return (
-        <div className="w-full">
-            {displayedPosts.map((post: any, index: number) => {
-                const postId = getPostId(post);
-                const thumbnailUrl = getThumbnailUrl(post);
-                const hasImageError = imageErrors[postId];
-                const showThumbnail = thumbnailUrl && !hasImageError;
-                const isLast = index === displayedPosts.length - 1;
-                const statusStyle = getStatusStyles(post?.status);
+        {displayedPosts.map((post:any,index:number)=>{
 
-                return (
-                    <article
-                        key={postId || index}
-                        ref={isLast ? lastPostRef : null}
-                        className="group relative border-b border-border/60 last:border-b-0"
-                    >
-                        {/* signature: accent bar draws in on hover, editor-tab style */}
-                        <span className="absolute left-0 top-0 h-full w-[2px] scale-y-0 bg-primary transition-transform duration-300 ease-out group-hover:scale-y-100" />
+            const postId = getPostId(post);
+            const thumbnailUrl = getThumbnailUrl(post);
+            const hasImageError = imageErrors[postId];
+            const showThumbnail = thumbnailUrl && !hasImageError;
 
-                        <div className="px-4 py-5 transition-colors duration-200 md:px-5 md:group-hover:bg-surface/40">
-                            {/* Header */}
-                            <div className="flex items-center gap-3"> 
-                                <Link to={`/profile/${post?.userId?.username}`} className="shrink-0">
-                                    {post?.userId?.profile_url ? (
-                                        <img
-                                            src={post.userId.profile_url}
-                                            alt={post.userId.username}
-                                            className="h-9 w-9 rounded-full object-cover ring-1 ring-border"
-                                        />
-                                    ) : (
-                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary ring-1 ring-border">
-                                            {getInitials(post?.userId?.name)}
-                                        </div>
-                                    )}
-                                </Link>
+            return (
 
-                                <div className="flex min-w-0 flex-1 items-center gap-2 font-mono text-[12.5px]">
-                                    <span className="truncate font-medium text-text">
-                                        {post?.userId.name || "anonymous"}
-                                    </span>
-                                    <span className="text-text-secondary/40">·</span>
-                                    <span className="flex shrink-0 items-center gap-1 text-text-secondary/70">
-                                        <Clock size={11} />
-                                        {formatDate(post?.createdAt?.toString())}
-                                    </span>
-                                    {post?.status && post.status !== "published" && (
-                                        <span
-                                            className={`ml-1 rounded-full border px-2 py-0.5 text-[10px] font-sans tracking-wide ${statusStyle}`}
-                                        >
-                                            {post.status}
-                                        </span>
-                                    )}
+            <article
+                key={postId}
+                ref={index === displayedPosts.length - 1 ? lastPostRef : null}
+                className="
+                    bg-surface
+                    border border-border
+                    rounded-2xl
+                    overflow-hidden
+                    transition
+                    hover:border-primary/30
+                "
+            >
+
+
+                {/* USER HEADER */}
+
+                <div className="
+                    flex
+                    items-center
+                    justify-between
+                    px-5
+                    pt-5
+                ">
+
+
+                    <div className="
+                        flex
+                        items-center
+                        gap-3
+                    ">
+
+                        <Link to={`/profile/${post.userId?._id}`}>
+
+                            {
+                                post.userId?.profile_url ?
+
+                                <img
+                                    src={post.userId.profile_url}
+                                    className="
+                                        h-11
+                                        w-11
+                                        rounded-full
+                                        object-cover
+                                        border border-border
+                                    "
+                                />
+
+                                :
+
+                                <div className="
+                                    h-11
+                                    w-11
+                                    rounded-full
+                                    bg-primary/15
+                                    text-primary
+                                    flex
+                                    items-center
+                                    justify-center
+                                    font-semibold
+                                ">
+                                    {getInitials(post.userId?.name)}
                                 </div>
 
-                                <button
-                                    aria-label="More options"
-                                    className="shrink-0 rounded-full p-1.5 text-text-secondary/50 transition hover:bg-surface-hover hover:text-text"
-                                >
-                                    <MoreHorizontal size={16} />
-                                </button>
-                            </div>
+                            }
 
-                            {/* Content */}
-                            <div className="mt-3 pl-12">
-                                <h2 className="font-display text-[17px] font-semibold leading-snug text-text">
-                                    {post?.title}
-                                </h2>
+                        </Link>
 
-                                <p className="mt-1.5 text-[14px] leading-relaxed text-text-secondary line-clamp-3">
-                                    {post?.description}
-                                </p>
 
-                                {showThumbnail && (
-                                    <div className="mt-3 overflow-hidden rounded-xl border border-border">
-                                        <img
-                                            src={thumbnailUrl}
-                                            alt={post?.title}
-                                            className="h-52 w-full object-cover"
-                                            onError={() => handleImageError(postId)}
-                                        />
-                                    </div>
-                                )}
 
-                                {post?.techStack && post.techStack.length > 0 && (
-                                    <div className="mt-3 flex flex-wrap gap-1.5">
-                                        {post.techStack.slice(0, 5).map((tech: string, idx: number) => (
-                                            <span
-                                                key={`${tech}-${idx}`}
-                                                className="rounded-md border border-border bg-surface px-2 py-0.5 font-mono text-[11px] text-text-secondary"
-                                            >
-                                                {tech}
-                                            </span>
-                                        ))}
-                                        {post.techStack.length > 5 && (
-                                            <span className="rounded-md px-2 py-0.5 font-mono text-[11px] text-text-secondary/60">
-                                                +{post.techStack.length - 5}
-                                            </span>
-                                        )}
-                                    </div>
-                                )}
+                        <div>
 
-                                {/* Actions */}
-                                <div className="mt-4 flex items-center gap-1">
-                                    <button className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-xs text-text-secondary transition hover:bg-danger/10 hover:text-danger">
-                                        <button
-                                            onClick={() => Likepost(post._id)}
-                                            className={`flex items-center gap-1.5 rounded-full px-2 py-1.5 text-xs transition ${post.isLiked
-                                                ? "text-red-500"
-                                                : "text-text-secondary hover:bg-danger/10 hover:text-danger"
-                                                }`}
-                                        >
-                                            <Heart
-                                                size={16}
-                                                strokeWidth={1.75}
-                                                fill={post.isLiked ? "currentColor" : "none"}
-                                            />
-                                            <span className="font-mono">{post.starCount}</span>
-                                        </button>
-                                    </button>
-                                        <button onClick={()=>{toggle(post._id)}}>
-                                            Bookmark
-                                        </button>
+                            <p className="
+                                text-sm
+                                font-semibold
+                                text-text
+                            ">
+                                {post.userId?.name || "Anonymous"}
+                            </p>
 
-                                        <button onClick={()=>{setIsCommentOpen(!isCommentOpen)}}>
-                                            Comment
-                                        </button>
-                                    <button className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-xs text-text-secondary transition hover:bg-primary/10 hover:text-primary">
-                                        <MessageCircle size={16} strokeWidth={1.75} />
-                                        <span className="font-mono">0</span>
-                                    </button>
 
-                                    <button
-                                        aria-label="Share"
-                                        className="rounded-full p-1.5 text-text-secondary transition hover:bg-primary/10 hover:text-primary"
-                                    >
-                                        <Share2 size={16} strokeWidth={1.75} />
-                                    </button>
+                            <p className="
+                                text-xs
+                                text-text-secondary
+                            ">
+                                @{post.userId?.username}
+                                {" · "}
+                                {formatDate(post.createdAt)}
+                            </p>
 
-                                    <button
-                                        aria-label="Views"
-                                        className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-xs text-text-secondary transition hover:bg-surface-hover"
-                                    >
-                                        <Eye size={16} strokeWidth={1.75} />
-                                        <span className="font-mono">{post?.viewCount || 0}</span>
-                                    </button>
-
-                                    <div className="ml-auto flex items-center gap-2">
-                                        {post?.liveUrl && (
-                                            <a
-                                                href={post.liveUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white transition hover:bg-primary-hover"
-                                            >
-                                                <ExternalLink size={12} />
-                                                Demo
-                                            </a>
-                                        )}
-                                        {post?.repoUrl && (
-                                            <a
-                                                href={post.repoUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-secondary transition hover:border-text-secondary/40 hover:text-text"
-                                            >
-                                                <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.15 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.62.24 2.85.12 3.15.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                                                </svg>
-                                                Code
-                                            </a>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
                         </div>
-                    </article>
-                );
-            })}
 
-            {visiblePosts < safePosts.length && (
-                <div className="flex justify-center py-6">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-primary" />
+
+                    </div>
+
+
+
+                    <MoreHorizontal
+                        size={18}
+                        className="
+                            text-text-secondary
+                        "
+                    />
+
                 </div>
-            )}
-        </div>
-    );
+
+
+
+
+
+                {/* POST CONTENT */}
+
+
+                <div className="
+                    px-5
+                    pt-4
+                ">
+
+
+                    <Link to={`/post/${post._id}`}>
+
+                        <h2 className="
+                            text-lg
+                            font-display
+                            font-semibold
+                            text-text
+                            hover:text-primary
+                            transition
+                        ">
+                            {post.title}
+                        </h2>
+
+                    </Link>
+
+
+
+                    <p className="
+                        mt-2
+                        text-sm
+                        leading-relaxed
+                        text-text-secondary
+                    ">
+                        {post.description}
+                    </p>
+
+
+
+                </div>
+
+
+
+
+
+                {/* IMAGE */}
+
+
+                {
+                    showThumbnail &&
+
+                    <div className="
+                        mt-4
+                        px-5
+                    ">
+
+                        <img
+                            src={thumbnailUrl}
+                            onError={()=>handleImageError(postId)}
+                            className="
+                                w-full
+                                max-h-[420px]
+                                rounded-xl
+                                object-cover
+                                border border-border
+                            "
+                        />
+
+                    </div>
+
+                }
+
+
+
+
+
+                {/* STACK */}
+
+
+                <div className="
+                    px-5
+                    mt-4
+                    flex
+                    flex-wrap
+                    gap-2
+                ">
+
+                    {
+                        post.techStack?.slice(0,6)
+                        .map((tech:string)=>(
+                            <span
+                                key={tech}
+                                className="
+                                    px-3
+                                    py-1
+                                    rounded-full
+                                    bg-background
+                                    border border-border
+                                    text-xs
+                                    text-text-secondary
+                                "
+                            >
+                                {tech}
+                            </span>
+                        ))
+                    }
+
+                </div>
+
+
+
+
+
+                {/* TAGS */}
+
+
+                <div className="
+                    px-5
+                    mt-3
+                    flex
+                    gap-3
+                    flex-wrap
+                ">
+
+                    {
+                        post.tags?.map((tag:any)=>(
+                            <span
+                                key={tag.name}
+                                className="
+                                    text-xs
+                                    text-primary
+                                "
+                            >
+                                #{tag.name}
+                            </span>
+                        ))
+                    }
+
+                </div>
+
+
+
+
+
+
+
+                {/* ACTION BAR */}
+
+
+                <div className="
+                    mt-5
+                    px-5
+                    py-3
+                    border-t border-border
+                    flex
+                    items-center
+                    justify-between
+                ">
+
+
+
+                    <div className="
+                        flex
+                        items-center
+                        gap-1
+                    ">
+
+
+
+                        <button
+                            onClick={()=>Likepost(post._id)}
+                            className="
+                                flex
+                                items-center
+                                gap-2
+                                px-3
+                                py-2
+                                rounded-full
+                                text-sm
+                                text-text-secondary
+                                hover:bg-danger/10
+                                hover:text-danger
+                            "
+                        >
+
+                            <Heart size={17}/>
+
+                            {post.starCount}
+
+                        </button>
+
+
+
+
+                        <button
+                            onClick={()=>setIsCommentOpen(true)}
+                            className="
+                                flex
+                                items-center
+                                gap-2
+                                px-3
+                                py-2
+                                rounded-full
+                                text-sm
+                                text-text-secondary
+                                hover:bg-primary/10
+                                hover:text-primary
+                            "
+                        >
+
+                            <MessageCircle size={17}/>
+
+                        </button>
+
+
+
+
+
+                        <button
+                            className="
+                                p-2
+                                rounded-full
+                                text-text-secondary
+                                hover:bg-primary/10
+                                hover:text-primary
+                            "
+                        >
+
+                            <Share2 size={17}/>
+
+                        </button>
+
+
+
+                    </div>
+
+
+
+
+
+
+                    <div className="
+                        flex
+                        items-center
+                        gap-3
+                    ">
+
+
+                        <span className="
+                            flex
+                            items-center
+                            gap-1
+                            text-xs
+                            text-text-secondary
+                        ">
+
+                            <Eye size={15}/>
+
+                            {post.viewCount}
+
+                        </span>
+
+
+
+
+
+                        {
+                            post.liveUrl &&
+
+                            <a
+                                href={post.liveUrl}
+                                target="_blank"
+                                className="
+                                    px-3
+                                    py-1.5
+                                    rounded-lg
+                                    bg-primary
+                                    text-white
+                                    text-xs
+                                    hover:bg-primary-hover
+                                "
+                            >
+                                Demo
+                            </a>
+
+                        }
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+            </article>
+
+            )
+
+        })}
+
+    </div>
+);
 };
 
 export default PostContainer;
