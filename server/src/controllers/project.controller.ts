@@ -166,7 +166,10 @@ export const getPostsById = async (
 
     const { id } = req.params;
 
-    const post = await Project.findById(id);
+    const post = await Project.findById(id).populate(
+      "userId",
+      "name username profile_url"
+    );
 
     if (!post) {
       res.status(404).json({
