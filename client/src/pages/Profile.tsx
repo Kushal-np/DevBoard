@@ -113,7 +113,9 @@ const Profile = () => {
 
   const handleUserClick = (u: FollowUser) => {
     setActiveList(null);
-    navigate(`/profile/${u.username}`);
+    if (u.username) {
+      navigate(`/profile/${u.username}`);
+    }
   };
 
   return (

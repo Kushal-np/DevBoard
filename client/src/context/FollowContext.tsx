@@ -44,12 +44,7 @@ export function FollowProvider({ children }: { children: ReactNode }) {
   const [followers, setFollowers] = useState<FollowUser[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // =============================
-  // GET FOLLOW DATA FOR A PROFILE
-  // =============================
-  // Loads followers/following for whichever profile is currently on
-  // screen — works the same whether it's your own profile or someone
-  // else's, since it's the same endpoint/shape either way.
+
   const refreshFollowData = useCallback(async (userId: string) => {
     try {
       setIsLoading(true);
@@ -63,31 +58,27 @@ export function FollowProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // =============================
-  // FOLLOW USER
-  // =============================
+
   const follow = async (userId: string) => {
     try {
       setIsLoading(true);
       await followUser(userId);
     } catch (error) {
       console.error("Follow failed:", error);
-      throw error; // let the caller revert its optimistic update
+      throw error; 
     } finally {
       setIsLoading(false);
     }
   };
 
-  // =============================
-  // UNFOLLOW USER
-  // =============================
+
   const unfollow = async (userId: string) => {
     try {
       setIsLoading(true);
       await unfollowUser(userId);
     } catch (error) {
       console.error("Unfollow failed:", error);
-      throw error; // let the caller revert its optimistic update
+      throw error; 
     } finally {
       setIsLoading(false);
     }
