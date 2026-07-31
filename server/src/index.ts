@@ -7,10 +7,19 @@ import profileRoutes from "./routes/profile.routes";
 import projectRoutes from "./routes/project.routes"
 import bookmarkRoutes from "./routes/bookmark.routes"
 import cookieParser from "cookie-parser";
+import http from "http";
+import { initChatSocket } from "./sockets/chat.socket";
+
+
 dotenv.config();
 const app = express() ;
 
 const PORT = process.env.PORT 
+
+const server = http.createServer(app);
+
+initChatSocket(server);
+
 app.use(cookieParser());
 app.use(
   cors({
@@ -24,10 +33,7 @@ app.use("/api/user" , userRoutes);
 app.use("/api/profile" , profileRoutes );
 app.use("/api/project" , projectRoutes )
 app.use("/api/bookmark" , bookmarkRoutes);
-app.get("/ping", (req, res) => {
-  console.log("PING HIT");
-  res.send("pong");
-});
+
 app.listen(PORT , ()=>{
     console.log(`server running on port ${PORT}`);
     connectDB();
