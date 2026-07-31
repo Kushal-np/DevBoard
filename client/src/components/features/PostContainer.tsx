@@ -55,9 +55,6 @@ const PostContainer = () => {
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [visiblePosts, setVisiblePosts] = useState(5);
 
-  // Which post's comment modal is open (null = none). Tracking the id
-  // instead of a single boolean means each post opens its own modal
-  // with the right data, instead of one shared flag with no context.
   const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
 
   const [likeState, setLikeState] = useState<Record<string, LikeState>>({});
@@ -315,13 +312,7 @@ const PostContainer = () => {
                 {state.count}
               </button>
 
-              <button
-                onClick={() => setActiveCommentPostId(postId)}
-                className="flex items-center gap-1 text-text-secondary hover:text-primary transition"
-              >
-                <MessageCircle size={16} />
-                Comment
-              </button>
+
 
               <button
                 onClick={() => toggle(post._id)}
@@ -339,12 +330,7 @@ const PostContainer = () => {
         );
       })}
 
-      {activeCommentPostId && (
-        <CommentModal
-          postId={activeCommentPostId}
-          onClose={() => setActiveCommentPostId(null)}
-        />
-      )}
+
     </div>
   );
 };
