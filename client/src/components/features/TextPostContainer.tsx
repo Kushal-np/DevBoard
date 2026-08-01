@@ -1,3 +1,5 @@
+// src/components/features/TextPostContainer.tsx
+
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Clock } from "lucide-react";
