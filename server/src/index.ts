@@ -10,17 +10,11 @@ import chatRoutes from "./routes/message.routes";
 import cookieParser from "cookie-parser";
 import http from "http";
 import { initChatSocket } from "./sockets/chat.socket";
-
-
 dotenv.config();
 const app = express() ;
-
 const PORT = process.env.PORT 
-
 const server = http.createServer(app);
-
 initChatSocket(server);
-
 app.use(cookieParser());
 app.use(
   cors({
@@ -35,7 +29,6 @@ app.use("/api/profile" , profileRoutes );
 app.use("/api/project" , projectRoutes )
 app.use("/api/bookmark" , bookmarkRoutes);
 app.use("/api/chat" , chatRoutes);
-
 server.listen(PORT , ()=>{
     console.log(`server running on port ${PORT}`);
     connectDB();
