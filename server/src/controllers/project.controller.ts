@@ -203,29 +203,50 @@ export const getFeed = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+
+    const limit = Number(req.query.limit) || 30;
     const feedUserIds = [...req.user?.following, req.user?._id];
-    const projects = await Project.find({
+
+
+    const latestProject = await Project.findOne({
       userId: { $in: feedUserIds },
       status: "published",
-    }).populate("userId", "name username profile_url")
+    })
       .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      .populate("userId", "name username profile_url");
+
+    const poolSize = Math.max(limit * 4, 60);
+
+    const randomProjects = await Project.aggregate([
+      {
+        $match: {
+          userId: { $in: feedUserIds },
+          status: "published",
+          ...(latestProject ? { _id: { $ne: latestProject._id } } : {}),
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      { $limit: poolSize },
+      { $sample: { size: Math.max(limit - (latestProject ? 1 : 0), 0) } },
+    ]);
+
+    const populatedRandom = await Project.populate(randomProjects, {
+      path: "userId",
+      select: "name username profile_url",
+    });
+
+    const projects = latestProject ? [latestProject, ...populatedRandom] : populatedRandom;
 
     res.status(200).json({
       success: true,
       projects,
-      message: "Feed fetched successfully"
+      message: "Feed fetched successfully",
     });
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -344,5 +365,89 @@ export const getStarredPost = async (
       success: false,
       message: "Internal server error",
     });
+  }
+};
+
+export const getProjectsByUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = Array.isArray(req.params.userId)
+      ? req.params.userId[0]
+      : req.params.userId;
+
+    if (!userId || !Types.ObjectId.isValid(userId)) {
+      res.status(400).json({ success: false, message: "Invalid userId" });
+      return;
+    }
+
+    const projects = await Project.find({ userId, status: "published" })
+      .populate("userId", "name username profile_url")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      projects,
+      message: "User projects fetched successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const getFeaturedPosts = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: "User isn't authenticated" });
+      return;
+    }
+
+    const projects = await Project.find({ featured: true, status: "published" })
+      .populate("userId", "name username profile_url")
+      .sort({ createdAt: -1 })
+      .limit(20);
+
+    res.status(200).json({
+      success: true,
+      projects,
+      message: "Featured projects fetched successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const getExplorePosts = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: "User isn't authenticated" });
+      return;
+    }
+
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
+
+    // Explore = published posts outside your own feed (not people you follow),
+    // ranked by popularity rather than pure recency.
+    const excludeIds = [...(req.user.following || []), req.user._id];
+
+    const projects = await Project.find({
+      status: "published",
+      userId: { $nin: excludeIds },
+    })
+      .populate("userId", "name username profile_url")
+      .sort({ starCount: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      success: true,
+      projects,
+      message: "Explore projects fetched successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

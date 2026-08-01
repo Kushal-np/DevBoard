@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/user.model";
 import { RequestHandler } from "express";
+import Project from "../models/project.model";
 
 type UserParams = {
   username: string;
@@ -35,3 +36,4 @@ export const getUserProfile: RequestHandler<UserParams> = async (
     user,
   });
 };
+

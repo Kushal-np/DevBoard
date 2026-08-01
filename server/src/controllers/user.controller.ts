@@ -356,3 +356,28 @@ export const getFollowData = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getRecommendations = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: "Unathourized" });
+      return;
+    }
+
+    const excludeIds = [...(req.user.following || []), req.user._id];
+
+    const users = await User.find({ _id: { $nin: excludeIds } })
+      .select("name username profile_url bio followerCount")
+      .sort({ followerCount: -1 })
+      .limit(10);
+
+    res.status(200).json({
+      success: true,
+      users,
+      message: "Recommendations fetched successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
