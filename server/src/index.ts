@@ -4,8 +4,9 @@ import cors from "cors";
 import connectDB from "./config/db";
 import userRoutes from "./routes/user.routes";
 import profileRoutes from "./routes/profile.routes";
-import projectRoutes from "./routes/project.routes"
-import bookmarkRoutes from "./routes/bookmark.routes"
+import projectRoutes from "./routes/project.routes";
+import bookmarkRoutes from "./routes/bookmark.routes";
+import chatRoutes from "./routes/message.routes";
 import cookieParser from "cookie-parser";
 import http from "http";
 import { initChatSocket } from "./sockets/chat.socket";
@@ -33,10 +34,10 @@ app.use("/api/user" , userRoutes);
 app.use("/api/profile" , profileRoutes );
 app.use("/api/project" , projectRoutes )
 app.use("/api/bookmark" , bookmarkRoutes);
+app.use("/api/chat" , chatRoutes);
 
-app.listen(PORT , ()=>{
+server.listen(PORT , ()=>{
     console.log(`server running on port ${PORT}`);
     connectDB();
 })
 
-//v1 of backend

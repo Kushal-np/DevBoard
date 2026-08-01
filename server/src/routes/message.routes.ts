@@ -1,17 +1,12 @@
-import express from "express";
-import { authMiddleware } from "../middleware/auth.middleware";
-import {
-  getConversations,
-  startConversation,
-  getMessages,
-  sendMessage,
-} from "../controllers/message.controller";
+import { Router } from "express";
 
-const router = express.Router();
+import { authMiddleware} from "../middleware/auth.middleware"; // whatever your auth middleware is called
+import { getConversations, getMessages, getOrCreateConversation } from "../controllers/message.controller";
+
+const router = Router();
 
 router.get("/conversations", authMiddleware, getConversations);
-router.post("/conversations/:userId", authMiddleware, startConversation);
-router.get("/:conversationId", authMiddleware, getMessages);
-router.post("/:conversationId", authMiddleware, sendMessage);
+router.post("/conversations", authMiddleware, getOrCreateConversation);
+router.get("/conversations/:conversationId/messages", authMiddleware, getMessages);
 
 export default router;

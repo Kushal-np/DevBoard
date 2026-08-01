@@ -89,7 +89,7 @@ export const initChatSocket = (server: HTTPServer) => {
           });
 
           console.log(
-            `📩 Message sent in ${conversationId}: ${text}`
+            `Message sent in ${conversationId}: ${text}`
           );
 
           io.to(conversationId).emit("receive-message", message);
