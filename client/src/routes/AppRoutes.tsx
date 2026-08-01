@@ -16,6 +16,7 @@ import Chat from "../pages/Chat";
 import HomeRedirect from "../components/features/HomeRedirect";
 import Post from "../pages/Post";
 import ChatPage from "../pages/ChatPage";
+import Notifications from "../pages/Notifications";
 
 
 const AppRoutes = () => {
@@ -44,6 +45,7 @@ const AppRoutes = () => {
             <Route index element={<div className="flex h-full items-center justify-center text-text-secondary">Select a conversation</div>} />
             <Route path=":conversationId" element={<Chat />} />
           </Route>
+          <Route path="/notifications" element={<Notifications />} />
         </Route>
 
       </Route>

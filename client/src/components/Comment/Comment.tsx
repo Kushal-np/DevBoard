@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { X, Send } from "lucide-react";
 import apiClient from "../../api/axiosConfig";
+import { COMMENT_ENDPOINTS } from "../../api/endpoints";
 import { useAuth } from "../../hooks/useAuth";
 
 interface CommentUser {
@@ -41,8 +42,7 @@ const CommentModal = ({ postId, onClose }: CommentModalProps) => {
       setError(null);
 
       try {
-        // Adjust this path to match your real backend route.
-        const res = await apiClient.get(`/comments/post/${postId}`);
+        const res = await apiClient.get(COMMENT_ENDPOINTS.LIST(postId));
         if (!cancelled) {
           setComments(res.data?.comments ?? []);
         }
@@ -82,8 +82,7 @@ const CommentModal = ({ postId, onClose }: CommentModalProps) => {
     setError(null);
 
     try {
-      // Adjust this path/body shape to match your real backend route.
-      const res = await apiClient.post(`/comments/post/${postId}`, {
+      const res = await apiClient.post(COMMENT_ENDPOINTS.CREATE(postId), {
         text: trimmed,
       });
 

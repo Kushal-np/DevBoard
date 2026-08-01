@@ -36,6 +36,7 @@ export const BOOKMARK_ENDPOINTS = {
 };
 
 export const COMMENT_ENDPOINTS = {
+    CREATE: (projectId: string) => `/comment/${projectId}`,
     LIST: (projectId: string) => `/comment/${projectId}`,
     DELETE: (id: string) => `/comment/${id}`,
 };
@@ -45,6 +46,12 @@ export const MESSAGE_ENDPOINTS = {
   START: `/chat/conversations`,
   GET_ONE: (conversationId: string) => `/chat/conversations/${conversationId}`,
   MESSAGES: (conversationId: string) => `/chat/conversations/${conversationId}/messages`,
+};
+
+export const NOTIFICATION_ENDPOINTS = {
+  LIST: `/notification`,
+  MARK_READ: (id: string) => `/notification/${id}/read`,
+  MARK_ALL_READ: `/notification/read-all`,
 };
 
 export const SEARCH_ENDPOINTS = {

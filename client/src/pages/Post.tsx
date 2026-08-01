@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Star, Send } from "lucide-react";
 import apiClient from "../api/axiosConfig";
-import { POST_ENDPOINTS } from "../api/endpoints";
+import { POST_ENDPOINTS, COMMENT_ENDPOINTS } from "../api/endpoints";
 import { useAuth } from "../hooks/useAuth";
 
 interface IComment {
@@ -67,7 +67,7 @@ const Post = () => {
       setCommentsLoading(true);
 
       try {
-        const res = await apiClient.get(`/comments/post/${postId}`);
+        const res = await apiClient.get(COMMENT_ENDPOINTS.LIST(postId));
         setComments(res.data?.comments ?? []);
       } catch (error) {
         console.error(error);
@@ -115,7 +115,7 @@ const Post = () => {
     setCommentError(null);
 
     try {
-      const res = await apiClient.post(`/comments/post/${postId}`, {
+      const res = await apiClient.post(COMMENT_ENDPOINTS.CREATE(postId), {
         text: trimmed,
       });
 

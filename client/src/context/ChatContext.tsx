@@ -14,6 +14,7 @@ import {
   getMessages as fetchMessages,
   getConversationById as fetchConversationById,
 } from "../api/services/chat.service";
+import type { INotification } from "../types/Notification";
 
 export type { IChatUser, IConversation, IMessage };
 
@@ -26,7 +27,8 @@ interface ChatContextType {
   getConversations: () => Promise<IConversation[]>;
   getOrCreateConversation: (recipientId: string) => Promise<IConversation>;
   getMessages: (conversationId: string) => Promise<IMessage[]>;
-  getConversationById: (conversationId: string) => Promise<IConversation>; // add
+  getConversationById: (conversationId: string) => Promise<IConversation>;
+  onNotification: (callback: (notification: INotification) => void) => () => void;
 }
 
 export const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -89,7 +91,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   const onReceiveMessage = useCallback((callback: (message: IMessage) => void) => {
     if (!socketRef.current) {
       console.warn("Socket is not connected");
-      return () => {};
+      return () => { };
     }
 
     socketRef.current.on("receive-message", callback);
@@ -99,18 +101,31 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     };
   }, []);
 
+  const onNotification = useCallback((callback: (notification: INotification) => void) => {
+    if (!socketRef.current) {
+      console.warn("Socket is not connected");
+      return () => { };
+    }
+
+    socketRef.current.on("new-notification", callback);
+
+    return () => {
+      socketRef.current?.off("new-notification", callback);
+    };
+  }, []);
+
   const getConversations = useCallback(async (): Promise<IConversation[]> => {
     const res = await fetchConversations();
     return res.conversations;
   }, []);
 
-const getConversationById = useCallback(
-  async (conversationId: string): Promise<IConversation> => {
-    const res = await fetchConversationById(conversationId);
-    return res.conversation;
-  },
-  []
-);
+  const getConversationById = useCallback(
+    async (conversationId: string): Promise<IConversation> => {
+      const res = await fetchConversationById(conversationId);
+      return res.conversation;
+    },
+    []
+  );
   const getOrCreateConversation = useCallback(
     async (recipientId: string): Promise<IConversation> => {
       const res = await startConversation(recipientId);
@@ -136,6 +151,7 @@ const getConversationById = useCallback(
         getOrCreateConversation,
         getMessages,
         getConversationById,
+        onNotification,
       }}
     >
       {children}

@@ -1,7 +1,8 @@
-import { type LucideIcon, Home, Bookmark, Heart, MessageCircle, Settings, User, LogOut } from "lucide-react";
+import { type LucideIcon, Home, Bookmark, Heart, MessageCircle, Bell, Settings, User, LogOut } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../theme/useTheme";
+import { useNotification } from "../../hooks/useNotification";
 
 import blackLogo from "../../assets/black.png";
 import whiteLogo from "../../assets/white.png";
@@ -15,6 +16,7 @@ interface NavLinkItem {
 const Sidebar = () => {
   const { user, logout } = useAuth();
   const { theme } = useTheme();
+  const { unreadCount } = useNotification();
 
   const logo = theme === "dark" ? blackLogo : whiteLogo;
 
@@ -23,6 +25,7 @@ const Sidebar = () => {
     { name: "Bookmarks", path: "/bookmarks", icon: Bookmark },
     { name: "Likes", path: "/likes", icon: Heart },
     { name: "Chat", path: "/chat", icon: MessageCircle },
+    { name: "Notifications", path: "/notifications", icon: Bell },
     { name: "Settings", path: "/settings", icon: Settings },
   ];
 
@@ -37,6 +40,8 @@ const Sidebar = () => {
         <div className="flex flex-col gap-1">
           {links.map((item) => {
             const Icon = item.icon;
+            const isNotifications = item.name === "Notifications";
+
             return (
               <NavLink
                 key={item.name}
@@ -49,7 +54,14 @@ const Sidebar = () => {
                   }`
                 }
               >
-                <Icon size={19} strokeWidth={1.75} />
+                <span className="relative">
+                  <Icon size={19} strokeWidth={1.75} />
+                  {isNotifications && unreadCount > 0 && (
+                    <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[9px] font-bold text-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </span>
                 <span>{item.name}</span>
               </NavLink>
             );
@@ -95,6 +107,8 @@ const Sidebar = () => {
       <div className="safe-area-bottom fixed bottom-0 left-0 right-0 z-50 flex justify-between border-t border-border bg-surface/95 px-1 py-1.5 backdrop-blur-md md:hidden">
         {links.map((item) => {
           const Icon = item.icon;
+          const isNotifications = item.name === "Notifications";
+
           return (
             <NavLink
               key={item.name}
@@ -107,7 +121,14 @@ const Sidebar = () => {
             >
               {({ isActive }) => (
                 <>
-                  <Icon size={21} strokeWidth={1.75} />
+                  <span className="relative">
+                    <Icon size={21} strokeWidth={1.75} />
+                    {isNotifications && unreadCount > 0 && (
+                      <span className="absolute -right-1.5 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-danger px-1 text-[8px] font-bold text-white">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
+                  </span>
                   {isActive && (
                     <span className="absolute -bottom-0.5 h-1 w-1 rounded-full bg-primary" />
                   )}
