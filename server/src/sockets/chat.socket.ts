@@ -5,7 +5,7 @@ import Message from "../models/message.model";
 import Conversation from "../models/conversation.model";
 import { IJWTPayload } from "../interfaces/Response/Jwt";
 import { setIO } from "./socketRegistry";
-import { createNotification } from "../services/notification.service";
+import { createNotification } from "../services/notification.services";
 
 export const initChatSocket = (server: HTTPServer) => {
   console.log("Socket initialized");

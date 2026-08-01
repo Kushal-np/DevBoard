@@ -7,6 +7,7 @@ import generateToken from "../utils/generateToken";
 import { IUserResponse } from "../interfaces/Response";
 import { IAuthResponse } from "../interfaces/Response/AuthResponse";
 import Follow from "../models/follow.model";
+import { createNotification } from "../services/notification.services";
 
 export const register = async (
     req: Request,
@@ -208,9 +209,8 @@ export const followUser = async (req: Request, res: Response): Promise<void> => 
             return;
         }
         const currentUser = await User.findById(req.user._id);
-        console.log("this is current",currentUser)
         const userToFollow = await User.findById(req.params.id);
-        console.log("this is the the user to follow ",userToFollow)
+
         if (!currentUser || !userToFollow) {
             res.status(404).json({
                 success: false,
@@ -239,6 +239,13 @@ export const followUser = async (req: Request, res: Response): Promise<void> => 
 
         await currentUser.save();
         await userToFollow.save();
+
+        await createNotification({
+            recipientId: userToFollow._id.toString(),
+            senderId: currentUser._id.toString(),
+            type: "follow",
+            text: "started following you",
+        });
 
         res.status(200).json({
             success: true,

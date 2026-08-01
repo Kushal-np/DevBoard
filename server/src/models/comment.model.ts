@@ -1,14 +1,22 @@
-import mongoose, { Schema } from "mongoose";
-import { IComment } from "../interfaces/dbModels/comment.interface.model";
+import mongoose, { Schema, Document } from "mongoose";
 
-const commentSchema = new mongoose.Schema<IComment>(
+export interface IComment extends Document {
+  projectId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  text: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const commentSchema = new Schema<IComment>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     projectId: { type: Schema.Types.ObjectId, ref: "Project", required: true },
-    text: { type: String, required: true, maxlength: 500 },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    text: { type: String, required: true, trim: true, maxlength: 1000 },
   },
   { timestamps: true }
 );
 
-const Comment = mongoose.model<IComment>("Comment", commentSchema);
-export default Comment;
+commentSchema.index({ projectId: 1, createdAt: -1 });
+
+export default mongoose.model<IComment>("Comment", commentSchema);

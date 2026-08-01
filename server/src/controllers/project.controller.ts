@@ -2,6 +2,7 @@ import { Response, Request } from "express";
 import Project from "../models/project.model";
 import cloudinary from "../utils/cloudinary";
 import { Types } from "mongoose";
+import { createNotification } from "../services/notification.services";
 
 export const createPost = async (
   req: Request,
@@ -271,6 +272,18 @@ export const starPost = async (
     }
 
     await currentPost.save();
+
+    // Only notify on a fresh star, not on unstar, and createNotification
+    // already no-ops if the recipient is the same as the sender.
+    if (!alreadyStarred) {
+      await createNotification({
+        recipientId: currentPost.userId.toString(),
+        senderId: req.user._id,
+        type: "like",
+        text: "liked your post",
+        postId: currentPost._id.toString(),
+      });
+    }
 
     res.status(200).json({
       success: true,

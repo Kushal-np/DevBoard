@@ -1,11 +1,11 @@
-import express from "express";
+import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.middleware";
-import { addComment, getComments, deleteComment } from "../controllers/comment.controller";
+import { createComment, getComments, deleteComment } from "../controllers/comment.controller";
 
-const router = express.Router();
+const router = Router();
 
-router.get("/:projectId", authMiddleware, getComments);
-router.post("/:projectId", authMiddleware, addComment);
+router.post("/:projectId", authMiddleware, createComment);
+router.get("/:projectId", getComments);
 router.delete("/:id", authMiddleware, deleteComment);
 
 export default router;
