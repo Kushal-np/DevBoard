@@ -1,3 +1,5 @@
+// src/context/NotificationContext.tsx
+
 import { createContext, useCallback, useEffect, useState, type ReactNode } from "react";
 import { useChat } from "../hooks/useChat";
 import type { INotification } from "../types/Notification";
@@ -41,6 +43,11 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     load();
   }, [load]);
 
+  // This is the real-time piece: onNotification subscribes to the
+  // "new-notification" socket event (wired in ChatContext). Whenever
+  // the backend emits one, this runs immediately and updates state,
+  // which re-renders anything reading unreadCount — including the
+  // Sidebar bell badge — with no refresh or polling required.
   useEffect(() => {
     const unsubscribe = onNotification((notification) => {
       setNotifications((prev) => [notification, ...prev]);
