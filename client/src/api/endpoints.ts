@@ -41,9 +41,10 @@ export const COMMENT_ENDPOINTS = {
 };
 
 export const MESSAGE_ENDPOINTS = {
-    CONVERSATIONS: `/message/conversations`,
-    START: (userId: string) => `/message/conversations/${userId}`,
-    MESSAGES: (conversationId: string) => `/message/${conversationId}`,
+  CONVERSATIONS: `/chat/conversations`,
+  START: `/chat/conversations`,
+  GET_ONE: (conversationId: string) => `/chat/conversations/${conversationId}`,
+  MESSAGES: (conversationId: string) => `/chat/conversations/${conversationId}/messages`,
 };
 
 export const SEARCH_ENDPOINTS = {

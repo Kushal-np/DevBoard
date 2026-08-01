@@ -1,4 +1,4 @@
-export interface IParticipant {
+export interface IChatUser {
   _id: string;
   name: string;
   username: string;
@@ -7,7 +7,7 @@ export interface IParticipant {
 
 export interface IConversation {
   _id: string;
-  participants: IParticipant[];
+  participants: IChatUser[];
   lastMessage?: string;
   lastMessageAt?: string;
 }
@@ -15,8 +15,7 @@ export interface IConversation {
 export interface IMessage {
   _id: string;
   conversationId: string;
-  senderId: string;
+  senderId: IChatUser | string;
   text: string;
-  read: boolean;
   createdAt: string;
 }

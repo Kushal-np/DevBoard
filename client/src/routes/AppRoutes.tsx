@@ -15,6 +15,7 @@ import Likes from "../pages/Likes";
 import Chat from "../pages/Chat";
 import HomeRedirect from "../components/features/HomeRedirect";
 import Post from "../pages/Post";
+import ChatPage from "../pages/ChatPage";
 
 
 const AppRoutes = () => {
@@ -38,7 +39,11 @@ const AppRoutes = () => {
           <Route path="/likes" element={<Likes />} />
           <Route path="/profile/:username" element={<Profile />} />
           <Route path="/chat" element={<Chat />} />
-          <Route path="/post/:postId" element={<Post/>}/>
+          <Route path="/post/:postId" element={<Post />} />
+          <Route path="/chat" element={<ChatPage />}>
+            <Route index element={<div className="flex h-full items-center justify-center text-text-secondary">Select a conversation</div>} />
+            <Route path=":conversationId" element={<Chat />} />
+          </Route>
         </Route>
 
       </Route>

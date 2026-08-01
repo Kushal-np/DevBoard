@@ -1,97 +1,144 @@
-import { createContext, useState, useRef, useCallback, useEffect, type ReactNode } from "react";
-import { io, type Socket } from "socket.io-client";
-import { getConversations, startConversation, getMessages } from "../api/services/chat.service";
-import { useAuth } from "../hooks/useAuth";
-import type { IConversation, IMessage } from "../types/Message";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { io, Socket } from "socket.io-client";
+import type { IChatUser, IConversation, IMessage } from "../types/Message";
+import {
+  getConversations as fetchConversations,
+  startConversation,
+  getMessages as fetchMessages,
+  getConversationById as fetchConversationById,
+} from "../api/services/chat.service";
+
+export type { IChatUser, IConversation, IMessage };
 
 interface ChatContextType {
-  conversations: IConversation[];
-  activeMessages: IMessage[];
-  activeConversationId: string | null;
-  isLoading: boolean;
-  loadConversations: () => Promise<void>;
-  openConversation: (userId: string) => Promise<void>;
-  sendMessage: (text: string) => void;
+  connected: boolean;
+  joinConversation: (conversationId: string) => void;
+  leaveConversation: (conversationId: string) => void;
+  sendMessage: (conversationId: string, text: string) => void;
+  onReceiveMessage: (callback: (message: IMessage) => void) => () => void;
+  getConversations: () => Promise<IConversation[]>;
+  getOrCreateConversation: (recipientId: string) => Promise<IConversation>;
+  getMessages: (conversationId: string) => Promise<IMessage[]>;
+  getConversationById: (conversationId: string) => Promise<IConversation>; // add
 }
 
 export const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-// Skeleton: connects to the socket server once authenticated, joins the
-// active conversation room, and appends incoming messages live.
-export function ChatProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth();
-  const socketRef = useRef<Socket | null>(null);
+interface ChatProviderProps {
+  children: ReactNode;
+}
 
-  const [conversations, setConversations] = useState<IConversation[]>([]);
-  const [activeMessages, setActiveMessages] = useState<IMessage[]>([]);
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+export const ChatProvider = ({ children }: ChatProviderProps) => {
+  const socketRef = useRef<Socket | null>(null);
+  const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    const socket = io("http://localhost:8000", {
+      withCredentials: true,
+    });
 
-    const socket = io("http://localhost:8000", { withCredentials: true });
     socketRef.current = socket;
 
-    socket.on("receive-message", (message: IMessage) => {
-      setActiveMessages((prev) =>
-        message.conversationId === activeConversationId ? [...prev, message] : prev
-      );
+    socket.on("connect", () => {
+      setConnected(true);
+    });
+
+    socket.on("disconnect", () => {
+      setConnected(false);
     });
 
     return () => {
       socket.disconnect();
+      socketRef.current = null;
     };
-  }, [isAuthenticated]);
-
-  const loadConversations = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const res = await getConversations();
-      setConversations(res.conversations || []);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
   }, []);
 
-  const openConversation = async (userId: string) => {
-    try {
-      setIsLoading(true);
-      const res = await startConversation(userId);
-      const conversationId = res.conversation._id;
-
-      socketRef.current?.emit("join-conversation", conversationId);
-      setActiveConversationId(conversationId);
-
-      const msgRes = await getMessages(conversationId);
-      setActiveMessages(msgRes.messages || []);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+  const joinConversation = useCallback((conversationId: string) => {
+    if (!socketRef.current) {
+      console.warn("Socket is not connected");
+      return;
     }
-  };
+    socketRef.current.emit("join-conversation", conversationId);
+  }, []);
 
-  const sendMessage = (text: string) => {
-    if (!activeConversationId || !text.trim()) return;
-    socketRef.current?.emit("send-message", { conversationId: activeConversationId, text });
-  };
+  const leaveConversation = useCallback((conversationId: string) => {
+    if (!socketRef.current) {
+      console.warn("Socket is not connected");
+      return;
+    }
+    socketRef.current.emit("leave-conversation", conversationId);
+  }, []);
+
+  const sendMessage = useCallback((conversationId: string, text: string) => {
+    if (!socketRef.current) {
+      console.warn("Socket is not connected");
+      return;
+    }
+    if (!text.trim()) return;
+
+    socketRef.current.emit("send-message", { conversationId, text });
+  }, []);
+
+  const onReceiveMessage = useCallback((callback: (message: IMessage) => void) => {
+    if (!socketRef.current) {
+      console.warn("Socket is not connected");
+      return () => {};
+    }
+
+    socketRef.current.on("receive-message", callback);
+
+    return () => {
+      socketRef.current?.off("receive-message", callback);
+    };
+  }, []);
+
+  const getConversations = useCallback(async (): Promise<IConversation[]> => {
+    const res = await fetchConversations();
+    return res.conversations;
+  }, []);
+
+const getConversationById = useCallback(
+  async (conversationId: string): Promise<IConversation> => {
+    const res = await fetchConversationById(conversationId);
+    return res.conversation;
+  },
+  []
+);
+  const getOrCreateConversation = useCallback(
+    async (recipientId: string): Promise<IConversation> => {
+      const res = await startConversation(recipientId);
+      return res.conversation;
+    },
+    []
+  );
+
+  const getMessages = useCallback(async (conversationId: string): Promise<IMessage[]> => {
+    const res = await fetchMessages(conversationId);
+    return res.messages;
+  }, []);
 
   return (
     <ChatContext.Provider
       value={{
-        conversations,
-        activeMessages,
-        activeConversationId,
-        isLoading,
-        loadConversations,
-        openConversation,
+        connected,
+        joinConversation,
+        leaveConversation,
         sendMessage,
+        onReceiveMessage,
+        getConversations,
+        getOrCreateConversation,
+        getMessages,
+        getConversationById,
       }}
     >
       {children}
     </ChatContext.Provider>
   );
-}
+};

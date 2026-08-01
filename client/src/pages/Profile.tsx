@@ -15,12 +15,14 @@ import { useAuth } from "../hooks/useAuth";
 import { useProfile } from "../hooks/useProfile";
 import type { FollowUser } from "../types/follow";
 import { useFollow } from "../hooks/useFollow";
+import { useChat } from "../hooks/useChat";
 
 const Profile = () => {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const { userProfile, isLoading, profileData } = useProfile();
+  const { getOrCreateConversation } = useChat();
 
   const {
     following,
@@ -36,11 +38,9 @@ const Profile = () => {
 
   const [activeList, setActiveList] = useState<"followers" | "following" | null>(null);
 
-  // Guards against clicking Follow/Unfollow before we actually know the
-  // real follow state — this was the root cause of the "already following"
-  // error: the button rendered as "Follow" while the first fetch was
-  // still in flight, so currentlyFollowing was wrongly false.
   const [followListLoaded, setFollowListLoaded] = useState(false);
+
+  const [isMessaging, setIsMessaging] = useState(false);
 
   useEffect(() => {
     if (username) {
@@ -73,8 +73,6 @@ const Profile = () => {
 
   const isMyProfile = !!user && user._id === userProfile._id;
 
-  // String() cast guards against ObjectId-vs-string mismatches between
-  // the auth user's _id and the follower objects' _id from the API.
   const currentlyFollowing =
     !!user && followers.some((f) => String(f._id) === String(user._id));
 
@@ -115,6 +113,25 @@ const Profile = () => {
     setActiveList(null);
     if (u.username) {
       navigate(`/profile/${u.username}`);
+    }
+  };
+
+  const handleMessageClick = async () => {
+    if (!isAuthenticated || !user) {
+      navigate("/login");
+      return;
+    }
+
+    if (isMessaging) return;
+
+    setIsMessaging(true);
+    try {
+      const conversation = await getOrCreateConversation(userProfile._id);
+      navigate(`/chat/${conversation._id}`);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsMessaging(false);
     }
   };
 
@@ -182,27 +199,37 @@ const Profile = () => {
                 Edit Profile
               </button>
             ) : (
-              <button
-                onClick={handleFollowClick}
-                disabled={isFollowLoading || !followListLoaded}
-                className={`flex shrink-0 items-center justify-center gap-2 rounded-full px-5 py-2.5 font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                  currentlyFollowing
-                    ? "border border-border bg-background text-text hover:border-red-400/50 hover:text-red-500"
-                    : "bg-primary text-background hover:bg-primary-hover"
-                }`}
-              >
-                {currentlyFollowing ? (
-                  <>
-                    <UserCheck size={16} />
-                    Following
-                  </>
-                ) : (
-                  <>
-                    <UserPlus size={16} />
-                    Follow
-                  </>
-                )}
-              </button>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  onClick={handleMessageClick}
+                  disabled={isMessaging}
+                  className="flex items-center justify-center gap-2 rounded-full border border-border bg-background px-5 py-2.5 font-medium text-text transition hover:border-primary/40 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Message
+                </button>
+
+                <button
+                  onClick={handleFollowClick}
+                  disabled={isFollowLoading || !followListLoaded}
+                  className={`flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                    currentlyFollowing
+                      ? "border border-border bg-background text-text hover:border-red-400/50 hover:text-red-500"
+                      : "bg-primary text-background hover:bg-primary-hover"
+                  }`}
+                >
+                  {currentlyFollowing ? (
+                    <>
+                      <UserCheck size={16} />
+                      Following
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus size={16} />
+                      Follow
+                    </>
+                  )}
+                </button>
+              </div>
             )}
           </div>
 
