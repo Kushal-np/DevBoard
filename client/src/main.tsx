@@ -11,6 +11,7 @@ import { FollowProvider } from './context/FollowContext.tsx'
 import { BookmarkProvider } from './context/BookmarkContext.tsx'
 import { ChatProvider } from './context/ChatContext.tsx'
 import { NotificationProvider } from './context/NotificationContext.tsx'
+import { TextPostProvider } from './context/TextPostContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -23,7 +24,9 @@ createRoot(document.getElementById('root')!).render(
                 <BookmarkProvider>
                   <ChatProvider>
                     <NotificationProvider>
-                      <App />
+                      <TextPostProvider>
+                        <App />
+                      </TextPostProvider>
                     </NotificationProvider>
                   </ChatProvider>
                 </BookmarkProvider>

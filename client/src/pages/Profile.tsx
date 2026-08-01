@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   Mail,
   AtSign,
@@ -10,12 +10,31 @@ import {
   Edit3,
   Code2,
   X,
+  Heart,
+  Clock,
+  FolderGit2,
+  MessageSquare,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useProfile } from "../hooks/useProfile";
 import type { FollowUser } from "../types/follow";
 import { useFollow } from "../hooks/useFollow";
 import { useChat } from "../hooks/useChat";
+import apiClient from "../api/axiosConfig";
+import { POST_ENDPOINTS } from "../api/endpoints";
+import { getPostsByUser } from "../api/services/textPost.service";
+import type { ITextPost } from "../types/TextPost";
+
+type ContentTab = "projects" | "posts";
+
+const timeAgo = (date: string): string => {
+  const diff = Date.now() - new Date(date).getTime();
+  const hrs = Math.floor(diff / 3600000);
+  if (hrs < 1) return "just now";
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+};
 
 const Profile = () => {
   const { username } = useParams<{ username: string }>();
@@ -37,10 +56,13 @@ const Profile = () => {
   } = useFollow();
 
   const [activeList, setActiveList] = useState<"followers" | "following" | null>(null);
-
   const [followListLoaded, setFollowListLoaded] = useState(false);
-
   const [isMessaging, setIsMessaging] = useState(false);
+
+  const [contentTab, setContentTab] = useState<ContentTab>("projects");
+  const [userProjects, setUserProjects] = useState<any[]>([]);
+  const [userPosts, setUserPosts] = useState<ITextPost[]>([]);
+  const [isContentLoading, setIsContentLoading] = useState(true);
 
   useEffect(() => {
     if (username) {
@@ -52,6 +74,18 @@ const Profile = () => {
     if (userProfile?._id) {
       setFollowListLoaded(false);
       refreshFollowData(userProfile._id).finally(() => setFollowListLoaded(true));
+
+      setIsContentLoading(true);
+      Promise.all([
+        apiClient.get(POST_ENDPOINTS.GET_BY_USER(userProfile._id)),
+        getPostsByUser(userProfile._id),
+      ])
+        .then(([projectsRes, postsRes]) => {
+          setUserProjects(projectsRes.data?.projects ?? []);
+          setUserPosts(postsRes.posts ?? []);
+        })
+        .catch(console.error)
+        .finally(() => setIsContentLoading(false));
     }
   }, [userProfile?._id, refreshFollowData]);
 
@@ -194,10 +228,13 @@ const Profile = () => {
             </div>
 
             {isMyProfile ? (
-              <button className="flex shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 font-medium text-background transition hover:bg-primary-hover">
+              <Link
+                to="/settings"
+                className="flex shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 font-medium text-background transition hover:bg-primary-hover"
+              >
                 <Edit3 size={16} />
                 Edit Profile
-              </button>
+              </Link>
             ) : (
               <div className="flex shrink-0 items-center gap-2">
                 <button
@@ -268,14 +305,107 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2">
-            <div className="flex items-center gap-2.5">
-              <Code2 size={18} className="text-accent" />
-              <SectionLabel>Featured Projects</SectionLabel>
+          <div className="rounded-2xl border border-border bg-surface lg:col-span-2 overflow-hidden">
+            <div className="flex border-b border-border">
+              <button
+                onClick={() => setContentTab("projects")}
+                className={`flex flex-1 items-center justify-center gap-2 py-3.5 text-sm font-medium transition ${
+                  contentTab === "projects"
+                    ? "border-b-2 border-primary text-primary"
+                    : "text-text-secondary hover:text-text"
+                }`}
+              >
+                <FolderGit2 size={16} />
+                Projects
+              </button>
+              <button
+                onClick={() => setContentTab("posts")}
+                className={`flex flex-1 items-center justify-center gap-2 py-3.5 text-sm font-medium transition ${
+                  contentTab === "posts"
+                    ? "border-b-2 border-primary text-primary"
+                    : "text-text-secondary hover:text-text"
+                }`}
+              >
+                <MessageSquare size={16} />
+                Posts
+              </button>
             </div>
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <ProjectCard title="DevBoard" description="Developer community platform" tech="React • Node • MongoDB" />
-              <ProjectCard title="Portfolio" description="Personal developer portfolio" tech="React • Tailwind" />
+
+            <div className="p-6">
+              {isContentLoading ? (
+                <div className="space-y-3">
+                  {[0, 1].map((i) => (
+                    <div key={i} className="h-20 rounded-xl bg-background animate-pulse" />
+                  ))}
+                </div>
+              ) : contentTab === "projects" ? (
+                userProjects.length === 0 ? (
+                  <p className="text-center text-sm text-text-secondary py-10">
+                    No published projects yet.
+                  </p>
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {userProjects.map((project) => (
+                      <Link
+                        key={project._id}
+                        to={`/post/${project._id}`}
+                        className="group rounded-xl border border-border bg-background p-5 transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-lg"
+                      >
+                        <h3 className="text-base font-bold transition group-hover:text-accent">
+                          {project.title}
+                        </h3>
+                        <p className="mt-2 text-sm text-text-secondary line-clamp-2">
+                          {project.description}
+                        </p>
+                        <div className="mt-4 flex items-center gap-3 text-xs text-text-secondary">
+                          <span className="flex items-center gap-1">
+                            <Heart size={12} />
+                            {project.starCount}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock size={12} />
+                            {timeAgo(project.createdAt)}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )
+              ) : userPosts.length === 0 ? (
+                <p className="text-center text-sm text-text-secondary py-10">
+                  No posts yet.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {userPosts.map((post) => (
+                    <div
+                      key={post._id}
+                      className="rounded-xl border border-border bg-background p-4"
+                    >
+                      <p className="text-sm text-text leading-relaxed whitespace-pre-wrap">
+                        {post.text}
+                      </p>
+                      {post.imageUrl && (
+                        <img
+                          src={post.imageUrl}
+                          alt=""
+                          className="mt-3 w-full max-h-72 rounded-lg object-cover"
+                        />
+                      )}
+                      <div className="mt-3 flex items-center gap-3 text-xs text-text-secondary">
+                        <span className="flex items-center gap-1">
+                          <Heart size={12} />
+                          {post.likeCount}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock size={12} />
+                          {timeAgo(post.createdAt)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -369,16 +499,6 @@ function Stat({ title, value }: { title: string; value: number | string }) {
     <div className="rounded-xl border border-border bg-background px-5 py-4 text-center transition hover:border-accent/40">
       <h3 className="text-2xl font-bold tabular-nums">{value}</h3>
       <p className="mt-1 font-mono text-xs uppercase tracking-wide text-text-secondary">{title}</p>
-    </div>
-  );
-}
-
-function ProjectCard({ title, description, tech }: { title: string; description: string; tech: string }) {
-  return (
-    <div className="group rounded-xl border border-border bg-background p-5 transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-lg">
-      <h3 className="text-base font-bold transition group-hover:text-accent">{title}</h3>
-      <p className="mt-2 text-sm text-text-secondary">{description}</p>
-      <p className="mt-4 font-mono text-xs text-accent">{tech}</p>
     </div>
   );
 }

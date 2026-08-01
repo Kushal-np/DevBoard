@@ -1,52 +1,91 @@
 // src/components/layout/TrendBar.tsx
 
-import { 
-  Users, 
-  TrendingUp, 
-  Hash,
-  ArrowUpRight,
-  Flame,
-  Clock,
-  UserPlus,
-  Zap,
-  Award,
-  Sparkles
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Users, ArrowUpRight, Flame, Clock, Award, Sparkles, Heart } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useFollow } from "../../hooks/useFollow";
+import apiClient from "../../api/axiosConfig";
+import { RECOMMENDATION_ENDPOINT, POST_ENDPOINTS } from "../../api/endpoints";
 
-// Dummy data
-const recommendedUsers = [
-  { id: 1, name: "Gaurish Baliga", username: "@gaurishcodes", avatar: "", bio: "Building the future" },
-  { id: 2, name: "Prabin KC", username: "@KcPrabin18", avatar: "", bio: "Fullstack Dev" },
-  { id: 3, name: "Yash Kalwani", username: "@WHYKalwani", avatar: "", bio: "UI/UX Designer" },
-  { id: 4, name: "Aarav Mehta", username: "@aaravdev", avatar: "", bio: "Open Source" },
-  { id: 5, name: "Priya Sharma", username: "@priyacodes", avatar: "", bio: "ML Engineer" },
-];
+interface RecommendedUser {
+  _id: string;
+  name: string;
+  username: string;
+  profile_url?: string;
+  bio?: string;
+}
 
-const trendingTopics = [
-  { id: 1, name: "#BuildinPublic", posts: "12.8K" },
-  { id: 2, name: "#GrindNation", posts: "6.7K" },
-  { id: 3, name: "#AI", posts: "6.2K" },
-  { id: 4, name: "#WebDev", posts: "5.1K" },
-  { id: 5, name: "#StartupLife", posts: "3.8K" },
-];
+interface PopularPost {
+  _id: string;
+  title: string;
+  starCount: number;
+  createdAt: string;
+  userId?: { username: string };
+}
 
-const trendingPosts = [
-  { id: 1, title: "How I built a SaaS in 30 days", author: "@kush", likes: 489, time: "2h ago" },
-  { id: 2, title: "The future of AI in 2026", author: "@sharapova", likes: 241, time: "6h ago" },
-  { id: 3, title: "From zero to first 100 users", author: "@kush", likes: 193, time: "6h ago" },
-  { id: 4, title: "My open source journey", author: "@devansh", likes: 156, time: "8h ago" },
-];
+const timeAgo = (date: string): string => {
+  const diff = Date.now() - new Date(date).getTime();
+  const hrs = Math.floor(diff / 3600000);
+  if (hrs < 1) return "just now";
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+};
+
+const getInitials = (name?: string) => {
+  if (!name) return "?";
+  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+};
 
 const TrendBar = () => {
   const { user } = useAuth();
+  const { follow } = useFollow();
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const [recommended, setRecommended] = useState<RecommendedUser[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
+
+  const [popularPosts, setPopularPosts] = useState<PopularPost[]>([]);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true);
+
+  useEffect(() => {
+    apiClient
+      .get(RECOMMENDATION_ENDPOINT)
+      .then((res) => setRecommended(res.data?.users ?? []))
+      .catch(console.error)
+      .finally(() => setIsLoadingUsers(false));
+
+    apiClient
+      .get(POST_ENDPOINTS.GET_EXPLORE)
+      .then((res) => {
+        const sorted = (res.data?.projects ?? [])
+          .slice()
+          .sort((a: PopularPost, b: PopularPost) => b.starCount - a.starCount)
+          .slice(0, 4);
+        setPopularPosts(sorted);
+      })
+      .catch(console.error)
+      .finally(() => setIsLoadingPosts(false));
+  }, []);
+
+  const handleFollow = async (targetId: string) => {
+    setFollowingIds((prev) => new Set(prev).add(targetId));
+    try {
+      await follow(targetId);
+      setRecommended((prev) => prev.filter((u) => u._id !== targetId));
+    } catch (err) {
+      console.error(err);
+      setFollowingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(targetId);
+        return next;
+      });
+    }
   };
 
   return (
-    <aside className="hidden lg:block lg:w-[340px] lg:shrink-0 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:py-6 lg:px-3 space-y-4 scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent">
+    <aside className="hidden lg:block lg:w-[340px] lg:shrink-0 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:py-6 lg:px-3 space-y-4">
       {/* Welcome Card */}
       <div className="rounded-2xl bg-surface/40 backdrop-blur-sm border border-border/30 p-4">
         <div className="flex items-center gap-3">
@@ -55,7 +94,7 @@ const TrendBar = () => {
           </div>
           <div>
             <p className="text-sm font-medium text-text">
-              Welcome back, {user?.username || 'Developer'}!
+              Welcome back, {user?.username || "Developer"}!
             </p>
             <p className="text-xs text-text-secondary/60">Discover what's trending</p>
           </div>
@@ -69,106 +108,102 @@ const TrendBar = () => {
             <Users size={16} className="text-primary" />
             Who to Follow
           </h3>
-          <button className="text-xs text-primary hover:text-primary-hover transition flex items-center gap-1">
-            See All
-            <ArrowUpRight size={12} />
-          </button>
         </div>
-        <div className="space-y-3">
-          {recommendedUsers.slice(0, 4).map((user) => (
-            <div key={user.id} className="flex items-center gap-3 group">
-              {user.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="h-9 w-9 rounded-full object-cover ring-2 ring-border/20"
-                />
-              ) : (
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-accent/20 text-xs font-medium text-primary ring-2 ring-border/20">
-                  {getInitials(user.name)}
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-text truncate">{user.name}</p>
-                <p className="text-xs text-text-secondary/60 truncate">{user.username}</p>
+
+        {isLoadingUsers ? (
+          <div className="space-y-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-9 rounded-lg bg-surface-hover animate-pulse" />
+            ))}
+          </div>
+        ) : recommended.length === 0 ? (
+          <p className="text-xs text-text-secondary/50">No suggestions right now.</p>
+        ) : (
+          <div className="space-y-3">
+            {recommended.slice(0, 4).map((u) => (
+              <div key={u._id} className="flex items-center gap-3 group">
+                <Link to={`/profile/${u.username}`} className="shrink-0">
+                  {u.profile_url ? (
+                    <img
+                      src={u.profile_url}
+                      alt={u.name}
+                      className="h-9 w-9 rounded-full object-cover ring-2 ring-border/20"
+                    />
+                  ) : (
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-accent/20 text-xs font-medium text-primary ring-2 ring-border/20">
+                      {getInitials(u.name)}
+                    </div>
+                  )}
+                </Link>
+                <Link to={`/profile/${u.username}`} className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-text truncate">{u.name}</p>
+                  <p className="text-xs text-text-secondary/60 truncate">@{u.username}</p>
+                </Link>
+                <button
+                  onClick={() => handleFollow(u._id)}
+                  disabled={followingIds.has(u._id)}
+                  className="rounded-full border border-primary/20 px-3 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-background hover:border-primary disabled:opacity-50"
+                >
+                  Follow
+                </button>
               </div>
-              <button className="rounded-full border border-primary/20 px-3 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-background hover:border-primary">
-                Follow
-              </button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Trending Topics */}
-      <div className="rounded-2xl border border-border/30 bg-surface/40 backdrop-blur-sm p-4 transition-colors hover:border-border/50">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-text flex items-center gap-2">
-            <TrendingUp size={16} className="text-primary" />
-            Trending
-          </h3>
-          <button className="text-xs text-primary hover:text-primary-hover transition flex items-center gap-1">
-            See All
-            <ArrowUpRight size={12} />
-          </button>
-        </div>
-        <div className="space-y-2">
-          {trendingTopics.slice(0, 4).map((topic) => (
-            <div 
-              key={topic.id} 
-              className="flex items-center justify-between group cursor-pointer rounded-lg px-2 py-1.5 transition-colors hover:bg-surface-hover"
-            >
-              <div className="flex items-center gap-2">
-                <Hash size={14} className="text-text-secondary/30" />
-                <span className="text-sm text-text transition-colors group-hover:text-primary">
-                  {topic.name}
-                </span>
-              </div>
-              <span className="text-xs text-text-secondary/40">{topic.posts} posts</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Popular Posts */}
+      {/* Popular Now */}
       <div className="rounded-2xl border border-border/30 bg-surface/40 backdrop-blur-sm p-4 transition-colors hover:border-border/50">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-text flex items-center gap-2">
             <Flame size={16} className="text-orange-400" />
             Popular Now
           </h3>
-          <button className="text-xs text-primary hover:text-primary-hover transition flex items-center gap-1">
+          <Link
+            to="/feed"
+            className="text-xs text-primary hover:text-primary-hover transition flex items-center gap-1"
+          >
             See All
             <ArrowUpRight size={12} />
-          </button>
+          </Link>
         </div>
-        <div className="space-y-3">
-          {trendingPosts.slice(0, 3).map((post) => (
-            <div 
-              key={post.id} 
-              className="group cursor-pointer rounded-lg px-2 py-2 transition-colors hover:bg-surface-hover"
-            >
-              <p className="text-sm text-text font-medium transition-colors group-hover:text-primary line-clamp-2">
-                {post.title}
-              </p>
-              <div className="flex items-center gap-3 mt-1 text-xs text-text-secondary/40">
-                <span className="flex items-center gap-1">
-                  <UserPlus size={12} />
-                  {post.author}
-                </span>
-                <span>·</span>
-                <span className="flex items-center gap-1">
-                  <Clock size={12} />
-                  {post.time}
-                </span>
-                <span>·</span>
-                <span className="flex items-center gap-1">
-                  ❤️ {post.likes}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+
+        {isLoadingPosts ? (
+          <div className="space-y-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-12 rounded-lg bg-surface-hover animate-pulse" />
+            ))}
+          </div>
+        ) : popularPosts.length === 0 ? (
+          <p className="text-xs text-text-secondary/50">No posts yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {popularPosts.map((post) => (
+              <Link
+                key={post._id}
+                to={`/post/${post._id}`}
+                className="group block cursor-pointer rounded-lg px-2 py-2 transition-colors hover:bg-surface-hover"
+              >
+                <p className="text-sm text-text font-medium transition-colors group-hover:text-primary line-clamp-2">
+                  {post.title}
+                </p>
+                <div className="flex items-center gap-3 mt-1 text-xs text-text-secondary/40">
+                  <span>@{post.userId?.username ?? "unknown"}</span>
+                  <span>·</span>
+                  <span className="flex items-center gap-1">
+                    <Clock size={12} />
+                    {timeAgo(post.createdAt)}
+                  </span>
+                  <span>·</span>
+                  <span className="flex items-center gap-1">
+                    <Heart size={12} />
+                    {post.starCount}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Get Certified */}
