@@ -1,16 +1,20 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import { useAuth } from "../../hooks/useAuth";
 import Sidebar from "./SideBar";
 import TrendBar from "../shared/TrendBar";
 
+const AUTH_ROUTES = ["/login", "/register"];
+
 const Layout = () => {
   const { isAuthenticated } = useAuth();
+  const { pathname } = useLocation();
+  const hideNavbar = AUTH_ROUTES.includes(pathname);
 
   if (!isAuthenticated) {
     return (
       <>
-        <Navbar />
+        {!hideNavbar && <Navbar />}
         <main className="w-full flex justify-center">
           <div className="w-full max-w-[1200px] px-4 py-4 md:px-6 md:py-6">
             <Outlet />

@@ -38,12 +38,6 @@ const AppRoutes = () => {
           <Route path="/search" element={<Search />} />
           <Route path="/profile/:username" element={<Profile />} />
           <Route path="/post/:postId" element={<Post />} />
-
-          {/* Chat is nested: /chat shows the conversation list, and
-              /chat/:conversationId opens a thread inside ChatPage's layout.
-              (Previously there was a duplicate standalone "/chat" route
-              pointing straight at <Chat/>, which shadowed this nested one
-              depending on route match order — removed.) */}
           <Route path="/chat" element={<ChatPage />}>
             <Route
               index
@@ -55,7 +49,6 @@ const AppRoutes = () => {
             />
             <Route path=":conversationId" element={<Chat />} />
           </Route>
-
           <Route path="/notifications" element={<Notifications />} />
         </Route>
       </Route>
