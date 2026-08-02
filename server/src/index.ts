@@ -8,8 +8,9 @@ import projectRoutes from "./routes/project.routes";
 import bookmarkRoutes from "./routes/bookmark.routes";
 import chatRoutes from "./routes/message.routes";
 import notificationRoutes from "./routes/notification.routes";
-import commentRoutes from "./routes/comment.routes"
-import postRoutes from "./routes/post.routes"
+import commentRoutes from "./routes/comment.routes";
+import postRoutes from "./routes/post.routes";
+import searchRoutes from "./routes/search.routes";
 import cookieParser from "cookie-parser";
 import http from "http";
 import { initChatSocket } from "./sockets/chat.socket";
@@ -35,6 +36,7 @@ app.use("/api/chat" , chatRoutes);
 app.use("/api/notification" , notificationRoutes);
 app.use("/api/comment" , commentRoutes);
 app.use("/api/posts", postRoutes); 
+app.use("/api/search" , searchRoutes);
 server.listen(PORT , ()=>{
     console.log(`server running on port ${PORT}`);
     connectDB();
