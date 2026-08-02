@@ -1,8 +1,9 @@
-
 import { useRef, useState } from "react";
 import { Image as ImageIcon, X, Send, Pencil } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useTextPost } from "../../hooks/useTextPost";
+
+const MAX_LENGTH = 500;
 
 const CreateTextPost = () => {
   const { user } = useAuth();
@@ -74,6 +75,9 @@ const CreateTextPost = () => {
     }
   };
 
+  const remaining = MAX_LENGTH - text.length;
+  const nearLimit = remaining <= 40;
+
   return (
     <>
       {/* TRIGGER BAR */}
@@ -89,7 +93,9 @@ const CreateTextPost = () => {
           </div>
         )}
 
-        <span className="flex-1 text-sm text-text-secondary">What's on your mind today?</span>
+        <span className="flex-1 font-mono text-sm text-text-secondary">
+          <span className="text-primary">{">"}</span> what's on your mind today?
+        </span>
 
         <Pencil size={16} className="shrink-0 text-text-secondary" />
       </button>
@@ -126,20 +132,30 @@ const CreateTextPost = () => {
 
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-text">{user?.name}</p>
-                  <p className="text-xs text-text-secondary">@{user?.username}</p>
+                  <p className="font-mono text-xs text-text-secondary">@{user?.username}</p>
                 </div>
               </div>
 
               <textarea
                 autoFocus
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={(e) => setText(e.target.value.slice(0, MAX_LENGTH))}
                 placeholder="What's on your mind today?"
                 rows={4}
+                maxLength={MAX_LENGTH}
                 className="mt-4 w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-text outline-none focus:border-primary"
               />
 
-              {error && <p className="mt-2 text-xs text-danger">{error}</p>}
+              <div className="mt-1.5 flex items-center justify-between">
+                <div>{error && <p className="text-xs text-danger">{error}</p>}</div>
+                <span
+                  className={`font-mono text-[11px] ${
+                    nearLimit ? "text-danger" : "text-text-secondary"
+                  }`}
+                >
+                  {remaining}
+                </span>
+              </div>
 
               {imagePreview && (
                 <div className="relative mt-3 w-fit">
@@ -171,14 +187,14 @@ const CreateTextPost = () => {
                 className="hidden"
               />
 
-<button
-  onClick={handleSubmit}
-  disabled={!text.trim() || isSubmitting}
-  className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-on-primary transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
->
-  <Send size={14} />
-  {isSubmitting ? "Posting..." : "Post"}
-</button>
+              <button
+                onClick={handleSubmit}
+                disabled={!text.trim() || isSubmitting}
+                className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-on-primary transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Send size={14} />
+                {isSubmitting ? "Posting..." : "Post"}
+              </button>
             </div>
           </div>
         </div>

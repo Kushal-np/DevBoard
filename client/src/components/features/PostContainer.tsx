@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from "react";
 import { useFeed } from "../../hooks/useFeed";
 import {
@@ -200,7 +199,7 @@ const PostContainer = () => {
                 <button
                   onClick={() => setOpenMenuId((id) => (id === postId ? null : postId))}
                   aria-label="Post options"
-                  className="flex h-8 w-8 items-center justify-center rounded text-text-secondary transition-colors duration-micro hover:bg-surface-2 hover:text-text"
+                  className="flex h-8 w-8 items-center justify-center rounded text-text-secondary transition-colors duration-micro hover:bg-surface-hover hover:text-text"
                 >
                   <MoreHorizontal size={16} />
                 </button>
@@ -209,7 +208,7 @@ const PostContainer = () => {
                   <div className="absolute right-0 z-20 mt-1 w-40 overflow-hidden rounded-md border border-border bg-surface shadow-md">
                     {isMine ? (
                       <>
-                        <Link to={`/post/${postId}`} onClick={() => setOpenMenuId(null)} className="flex items-center gap-2 px-3 py-2.5 text-sm text-text hover:bg-surface-2">
+                        <Link to={`/post/${postId}`} onClick={() => setOpenMenuId(null)} className="flex items-center gap-2 px-3 py-2.5 text-sm text-text hover:bg-surface-hover">
                           <Pencil size={14} /> View / Edit
                         </Link>
                         <button onClick={() => handleDelete(postId)} className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-danger hover:bg-danger/10">
@@ -217,7 +216,7 @@ const PostContainer = () => {
                         </button>
                       </>
                     ) : (
-                      <button onClick={() => { setOpenMenuId(null); handleShare(postId); }} className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-text hover:bg-surface-2">
+                      <button onClick={() => { setOpenMenuId(null); handleShare(postId); }} className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-text hover:bg-surface-hover">
                         <Link2 size={14} /> Copy link
                       </button>
                     )}
@@ -284,7 +283,7 @@ const PostContainer = () => {
                 className="flex items-center gap-1.5 text-sm text-text-secondary transition-colors duration-micro hover:text-primary"
               >
                 <MessageCircle size={16} strokeWidth={1.75} />
-                {commentCounts[postId] ?? ""}
+                {commentCounts[postId] ?? 0}
               </button>
 
               <button

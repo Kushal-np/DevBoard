@@ -63,7 +63,11 @@ interface StarResponse {
   starCount: number;
   message: string;
 }
-
+interface StarredResponse {
+  success: boolean;
+  projects: IPost[];
+  message: string;
+}
 export const LikePost = async (value: string): Promise<StarResponse> => {
   const { data } = await apiClient.post<StarResponse>(POST_ENDPOINTS.STAR_POST(value));
   return data;
@@ -97,5 +101,11 @@ export const updatePost = async (
 
 export const deletePost = async (id: string): Promise<{ success: boolean; message: string }> => {
   const { data } = await apiClient.delete(POST_ENDPOINTS.DELETE_POST(id));
+  return data;
+};
+
+
+export const getLikedPosts = async (): Promise<StarredResponse> => {
+  const { data } = await apiClient.get<StarredResponse>(POST_ENDPOINTS.GET_STARRED);
   return data;
 };

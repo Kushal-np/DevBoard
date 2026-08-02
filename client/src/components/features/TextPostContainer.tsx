@@ -10,11 +10,12 @@ const timeAgo = (date: string): string => {
   const diff = Date.now() - new Date(date).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60) return `${mins}m`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24) return `${hrs}h`;
   const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
+  if (days < 7) return `${days}d`;
+  return new Date(date).toLocaleDateString();
 };
 
 const getInitials = (name?: string) => {
@@ -39,7 +40,7 @@ const TextPostContainer = () => {
     return (
       <div className="space-y-4 p-4">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-40 rounded-2xl bg-surface animate-pulse" />
+          <div key={i} className="h-40 animate-pulse rounded-md bg-surface" />
         ))}
       </div>
     );
@@ -47,14 +48,15 @@ const TextPostContainer = () => {
 
   if (posts.length === 0) {
     return (
-      <div className="flex min-h-[300px] items-center justify-center text-text-secondary">
-        No posts yet. Be the first to share something.
+      <div className="flex min-h-[300px] flex-col items-center justify-center gap-2 px-6 text-center">
+        <p className="font-display text-lg text-text">No posts yet</p>
+        <p className="text-sm text-text-secondary">Be the first to share something.</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full flex flex-col gap-4 p-4">
+    <div className="flex w-full flex-col gap-4 p-4">
       {posts.map((post) => {
         const author = post.userId;
         const profileHref = author?.username ? `/profile/${author.username}` : null;
@@ -64,7 +66,7 @@ const TextPostContainer = () => {
         return (
           <article
             key={post._id}
-            className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition"
+            className="overflow-hidden rounded-md border border-border bg-surface transition-colors duration-micro hover:border-border-strong"
           >
             <div className="flex items-center justify-between px-5 py-4">
               <div className="flex items-center gap-3">
@@ -73,30 +75,30 @@ const TextPostContainer = () => {
                     {author?.profile_url ? (
                       <img
                         src={author.profile_url}
-                        className="h-11 w-11 rounded-full object-cover ring-1 ring-border"
+                        className="h-10 w-10 rounded-full object-cover ring-1 ring-border"
                       />
                     ) : (
-                      <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-wash font-mono text-sm font-medium text-primary">
                         {getInitials(author?.name)}
                       </div>
                     )}
                   </Link>
                 ) : (
-                  <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-wash font-mono text-sm font-medium text-primary">
                     {getInitials(author?.name)}
                   </div>
                 )}
 
                 <div>
                   {profileHref ? (
-                    <Link to={profileHref} className="text-text font-semibold hover:text-primary transition">
+                    <Link to={profileHref} className="text-sm font-semibold text-text transition-colors hover:text-primary">
                       {author?.name || "anonymous"}
                     </Link>
                   ) : (
-                    <span className="text-text font-semibold">{author?.name || "anonymous"}</span>
+                    <span className="text-sm font-semibold text-text">{author?.name || "anonymous"}</span>
                   )}
-                  <p className="text-sm text-text-secondary flex items-center gap-1">
-                    <Clock size={12} />
+                  <p className="mt-0.5 flex items-center gap-1.5 font-mono text-xs text-text-tertiary">
+                    <Clock size={11} />
                     {timeAgo(post.createdAt)}
                   </p>
                 </div>
@@ -106,31 +108,31 @@ const TextPostContainer = () => {
                 <button
                   onClick={() => handleDelete(post._id)}
                   aria-label="Delete post"
-                  className="rounded-full p-1.5 text-text-secondary transition hover:bg-danger/10 hover:text-danger"
+                  className="flex h-8 w-8 items-center justify-center rounded text-text-secondary transition-colors duration-micro hover:bg-danger/10 hover:text-danger"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={15} />
                 </button>
               )}
             </div>
 
             <div className="px-5 pb-4">
-              <p className="text-text leading-relaxed whitespace-pre-wrap">{post.text}</p>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">{post.text}</p>
             </div>
 
             {post.imageUrl && (
               <div className="w-full">
-                <img src={post.imageUrl} alt="" className="w-full max-h-[500px] object-cover" />
+                <img src={post.imageUrl} alt="" className="max-h-[500px] w-full object-cover" />
               </div>
             )}
 
-            <div className="border-t border-border px-5 py-3 flex items-center gap-6">
+            <div className="mt-1 flex items-center border-t border-border px-5 py-3">
               <button
                 onClick={() => toggleLike(post._id)}
-                className={`flex items-center gap-1.5 text-sm transition ${
+                className={`flex items-center gap-1.5 text-sm transition-colors duration-micro ${
                   isLiked ? "text-danger" : "text-text-secondary hover:text-danger"
                 }`}
               >
-                <Heart size={16} fill={isLiked ? "currentColor" : "none"} />
+                <Heart size={16} fill={isLiked ? "currentColor" : "none"} strokeWidth={1.75} />
                 {post.likeCount}
               </button>
             </div>

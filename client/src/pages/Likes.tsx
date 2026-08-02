@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Heart, Clock, FolderGit2, MessageSquare } from "lucide-react";
-import apiClient from "../api/axiosConfig";
-import { POST_ENDPOINTS } from "../api/endpoints";
-import { getLikedTextPosts } from "../api/services/textPost.service";
 import type { IPost } from "../types/Post";
 import type { ITextPost } from "../types/TextPost";
-
+import { getLikedPosts } from "../api/services/feed.service";
+import { getLikedTextPosts } from "../api/services/textPost.service"; // adjust path to your actual file
 type LikeTab = "projects" | "posts";
 
 const timeAgo = (date: string): string => {
@@ -31,20 +29,25 @@ const Likes = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const navigate = useNavigate();
+useEffect(() => {
+  setIsLoading(true);
 
-  useEffect(() => {
-    setIsLoading(true);
-    Promise.all([
-      apiClient.get(POST_ENDPOINTS.GET_STARRED),
-      getLikedTextPosts(),
-    ])
-      .then(([projectsRes, textRes]) => {
-        setProjects(projectsRes.data.projects || []);
-        setTextPosts(textRes.posts || []);
-      })
-      .catch(console.error)
-      .finally(() => setIsLoading(false));
-  }, []);
+  Promise.allSettled([getLikedPosts(), getLikedTextPosts()])
+    .then(([projectsResult, textResult]) => {
+      if (projectsResult.status === "fulfilled") {
+        setProjects(projectsResult.value.projects || []);
+      } else {
+        console.error("Failed to fetch liked projects:", projectsResult.reason);
+      }
+
+      if (textResult.status === "fulfilled") {
+        setTextPosts(textResult.value.posts || []);
+      } else {
+        console.error("Failed to fetch liked text posts:", textResult.reason);
+      }
+    })
+    .finally(() => setIsLoading(false));
+}, []);
 
   const activeCount = tab === "projects" ? projects.length : textPosts.length;
 

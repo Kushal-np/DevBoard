@@ -428,26 +428,31 @@ const PostContent = () => {
           </div>
 
           <div className="min-w-0 flex-1 pt-1">
-            <textarea
-              ref={titleRef}
-              name="title"
-              value={form.title}
-              onChange={(e) => {
-                handleChange(e);
-                autoGrow(titleRef.current);
-              }}
-              onFocus={() => setIsExpanded(true)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  setIsExpanded(true);
-                  descRef.current?.focus();
-                }
-              }}
-              placeholder="Share what you're building…"
-              rows={1}
-              className="w-full resize-none overflow-hidden bg-transparent font-display text-[17px] font-medium leading-snug text-text placeholder:font-sans placeholder:font-normal placeholder:text-text-secondary/70 focus:outline-none"
-            />
+            <div className="flex items-start gap-2">
+              <span className="mt-0.5 select-none font-mono text-[17px] font-medium text-primary">
+                {">"}
+              </span>
+              <textarea
+                ref={titleRef}
+                name="title"
+                value={form.title}
+                onChange={(e) => {
+                  handleChange(e);
+                  autoGrow(titleRef.current);
+                }}
+                onFocus={() => setIsExpanded(true)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    setIsExpanded(true);
+                    descRef.current?.focus();
+                  }
+                }}
+                placeholder="Share what you're building…"
+                rows={1}
+                className="w-full resize-none overflow-hidden bg-transparent font-display text-[17px] font-medium leading-snug text-text placeholder:font-sans placeholder:font-normal placeholder:text-text-secondary/70 focus:outline-none"
+              />
+            </div>
           </div>
         </div>
 

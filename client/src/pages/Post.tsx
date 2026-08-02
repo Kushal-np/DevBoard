@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Star, Send, Eye, Share2, Check, Trash2 } from "lucide-react";
+import { Star, Send, Eye, Share2, Check, Trash2, ArrowLeft } from "lucide-react";
 import apiClient from "../api/axiosConfig";
 import { POST_ENDPOINTS, COMMENT_ENDPOINTS } from "../api/endpoints";
 import { useAuth } from "../hooks/useAuth";
@@ -18,6 +18,20 @@ interface IComment {
   };
   createdAt: string;
 }
+
+// GitHub-style relative time — fits the terminal/mono timestamps already
+// used throughout the app better than a raw locale date string.
+const timeAgo = (dateString: string) => {
+  const diffMs = Date.now() - new Date(dateString).getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateString).toLocaleDateString();
+};
 
 const Post = () => {
   const { postId } = useParams<{ postId: string }>();
@@ -190,7 +204,15 @@ const Post = () => {
 
   return (
     <div className="min-h-screen bg-background px-4 py-10">
-      <div className="mx-auto max-w-xl space-y-6">
+      <div className="mx-auto max-w-xl space-y-4">
+        <button
+          onClick={() => navigate("/feed")}
+          className="flex items-center gap-1.5 font-mono text-xs text-text-secondary transition-colors duration-150 hover:text-text"
+        >
+          <ArrowLeft size={13} />
+          feed
+        </button>
+
         {/* POST CARD */}
         <article className="overflow-hidden rounded-xl border border-border bg-surface">
           <div className="flex items-center justify-between px-5 py-4">
@@ -224,8 +246,11 @@ const Post = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="font-mono text-xs text-text-secondary">
-                {new Date(post.createdAt).toLocaleDateString()}
+              <span
+                className="font-mono text-xs text-text-secondary"
+                title={new Date(post.createdAt).toLocaleString()}
+              >
+                {timeAgo(post.createdAt)}
               </span>
               {isMine && (
                 <button
@@ -303,22 +328,27 @@ const Post = () => {
 
         {/* COMMENT SECTION */}
         <section className="overflow-hidden rounded-xl border border-border bg-surface">
-          <div className="flex items-end gap-2 border-b border-border p-4">
-            <textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Write a comment..."
-              rows={1}
-              className="flex-1 resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-text outline-none transition-colors duration-150 focus:border-primary"
-            />
-            <button
-              onClick={handleCommentSubmit}
-              disabled={!commentText.trim() || isSubmitting}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-fg transition-colors duration-150 hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Send size={16} />
-            </button>
+          <div className="border-b border-border p-4">
+            <div className="flex items-end gap-2">
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Write a comment..."
+                rows={1}
+                className="flex-1 resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-text outline-none transition-colors duration-150 focus:border-primary"
+              />
+              <button
+                onClick={handleCommentSubmit}
+                disabled={!commentText.trim() || isSubmitting}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-fg transition-colors duration-150 hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Send size={16} />
+              </button>
+            </div>
+            <p className="mt-1.5 font-mono text-[11px] text-text-secondary">
+              ⏎ to send · ⇧⏎ for a new line
+            </p>
           </div>
 
           {commentError && <p className="px-4 pt-3 font-mono text-xs text-danger">{commentError}</p>}
@@ -358,13 +388,23 @@ const Post = () => {
                     )}
 
                     <div className="min-w-0">
-                      {commenterHref ? (
-                        <Link to={commenterHref} className="text-sm font-semibold text-text transition-colors duration-150 hover:text-primary">
-                          {commenter?.name || "anonymous"}
-                        </Link>
-                      ) : (
-                        <p className="text-sm font-semibold text-text">{commenter?.name || "anonymous"}</p>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {commenterHref ? (
+                          <Link to={commenterHref} className="text-sm font-semibold text-text transition-colors duration-150 hover:text-primary">
+                            {commenter?.name || "anonymous"}
+                          </Link>
+                        ) : (
+                          <p className="text-sm font-semibold text-text">{commenter?.name || "anonymous"}</p>
+                        )}
+                        {comment.createdAt && (
+                          <span
+                            className="font-mono text-[11px] text-text-secondary"
+                            title={new Date(comment.createdAt).toLocaleString()}
+                          >
+                            {timeAgo(comment.createdAt)}
+                          </span>
+                        )}
+                      </div>
                       <p className="break-words text-sm text-text-secondary">{comment.text}</p>
                     </div>
                   </div>
