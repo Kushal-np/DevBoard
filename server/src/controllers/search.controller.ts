@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import User from "../models/user.model";
 import Project from "../models/project.model";
 
-// GET /api/search/users?q=...
 export const searchUsers = async (req: Request, res: Response): Promise<void> => {
   try {
     const q = (req.query.q as string) || "";
@@ -27,7 +26,6 @@ export const searchUsers = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-// GET /api/search/posts?q=...  (matches title/description)
 export const searchPosts = async (req: Request, res: Response): Promise<void> => {
   try {
     const q = (req.query.q as string) || "";
@@ -53,7 +51,6 @@ export const searchPosts = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-// GET /api/search/tags?tag=React
 export const searchByTag = async (req: Request, res: Response): Promise<void> => {
   try {
     const tag = (req.query.tag as string) || "";

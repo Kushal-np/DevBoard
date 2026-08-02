@@ -14,10 +14,7 @@ export const getNotifications = async (req: Request, res: Response): Promise<voi
       .sort({ createdAt: -1 })
       .limit(50);
 
-    const unreadCount = await Notification.countDocuments({
-      recipientId: userId,
-      read: false,
-    });
+    const unreadCount = await Notification.countDocuments({ recipientId: userId, read: false });
 
     res.status(200).json({ success: true, notifications, unreadCount });
   } catch (error) {
@@ -41,10 +38,7 @@ export const markAsRead = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    await Notification.findOneAndUpdate(
-      { _id: id, recipientId: userId },
-      { read: true }
-    );
+    await Notification.findOneAndUpdate({ _id: id, recipientId: userId }, { read: true });
 
     res.status(200).json({ success: true });
   } catch (error) {
@@ -61,10 +55,7 @@ export const markAllAsRead = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    await Notification.updateMany(
-      { recipientId: userId, read: false },
-      { read: true }
-    );
+    await Notification.updateMany({ recipientId: userId, read: false }, { read: true });
 
     res.status(200).json({ success: true });
   } catch (error) {

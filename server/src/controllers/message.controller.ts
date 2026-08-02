@@ -42,13 +42,8 @@ export const getOrCreateConversation = async (req: Request, res: Response): Prom
     }).populate("participants", "name username profile_url");
 
     if (!conversation) {
-      conversation = await Conversation.create({
-        participants: [userId, recipientId],
-      });
-      conversation = await conversation.populate(
-        "participants",
-        "name username profile_url"
-      );
+      conversation = await Conversation.create({ participants: [userId, recipientId] });
+      conversation = await conversation.populate("participants", "name username profile_url");
     }
 
     res.status(200).json({ success: true, conversation });
@@ -57,11 +52,7 @@ export const getOrCreateConversation = async (req: Request, res: Response): Prom
   }
 };
 
-
-export const getMessages = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getMessages = async (req: Request, res: Response): Promise<void> => {
   try {
     const { conversationId } = req.params;
 
@@ -70,30 +61,21 @@ export const getMessages = async (
       Array.isArray(conversationId) ||
       !mongoose.Types.ObjectId.isValid(conversationId)
     ) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid conversationId",
-      });
+      res.status(400).json({ success: false, message: "Invalid conversationId" });
       return;
     }
 
     const conversation = await Conversation.findById(conversationId);
 
     if (!conversation) {
-      res.status(404).json({
-        success: false,
-        message: "Conversation not found",
-      });
+      res.status(404).json({ success: false, message: "Conversation not found" });
       return;
     }
 
     const userId = req.user?._id;
 
     if (!userId) {
-      res.status(401).json({
-        success: false,
-        message: "Not authenticated",
-      });
+      res.status(401).json({ success: false, message: "Not authenticated" });
       return;
     }
 
@@ -102,10 +84,7 @@ export const getMessages = async (
     );
 
     if (!isParticipant) {
-      res.status(403).json({
-        success: false,
-        message: "You are not a participant in this conversation",
-      });
+      res.status(403).json({ success: false, message: "You are not a participant in this conversation" });
       return;
     }
 
@@ -115,33 +94,19 @@ export const getMessages = async (
       .populate("senderId", "name username profile_url")
       .sort({ createdAt: 1 });
 
-    res.status(200).json({
-      success: true,
-      messages,
-    });
+    res.status(200).json({ success: true, messages });
   } catch (error) {
     console.error("Get messages error:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
-
-export const getConversationById = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getConversationById = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user?._id;
 
     if (!userId) {
-      res.status(401).json({
-        success: false,
-        message: "Not authenticated",
-      });
+      res.status(401).json({ success: false, message: "Not authenticated" });
       return;
     }
 
@@ -149,14 +114,8 @@ export const getConversationById = async (
       ? req.params.conversationId[0]
       : req.params.conversationId;
 
-    if (
-      !conversationId ||
-      !mongoose.Types.ObjectId.isValid(conversationId)
-    ) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid conversationId",
-      });
+    if (!conversationId || !mongoose.Types.ObjectId.isValid(conversationId)) {
+      res.status(400).json({ success: false, message: "Invalid conversationId" });
       return;
     }
 
@@ -166,10 +125,7 @@ export const getConversationById = async (
     );
 
     if (!conversation) {
-      res.status(404).json({
-        success: false,
-        message: "Conversation not found",
-      });
+      res.status(404).json({ success: false, message: "Conversation not found" });
       return;
     }
 
@@ -178,23 +134,13 @@ export const getConversationById = async (
     });
 
     if (!isParticipant) {
-      res.status(403).json({
-        success: false,
-        message: "Not a participant",
-      });
+      res.status(403).json({ success: false, message: "Not a participant" });
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      conversation,
-    });
+    res.status(200).json({ success: true, conversation });
   } catch (error) {
     console.error("Error fetching conversation:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

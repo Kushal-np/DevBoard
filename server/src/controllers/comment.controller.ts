@@ -33,11 +33,7 @@ export const createComment = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    const comment = await Comment.create({
-      projectId,
-      userId,
-      text: text.trim(),
-    });
+    const comment = await Comment.create({ projectId, userId, text: text.trim() });
 
     const populatedComment = await comment.populate("userId", "name username profile_url");
 
@@ -114,10 +110,7 @@ export const deleteComment = async (req: Request, res: Response): Promise<void> 
 
     await comment.deleteOne();
 
-    res.status(200).json({
-      success: true,
-      message: "Comment deleted successfully",
-    });
+    res.status(200).json({ success: true, message: "Comment deleted successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Internal server error" });
