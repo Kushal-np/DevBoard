@@ -1,10 +1,8 @@
-
-
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { Loader2 } from "lucide-react";
 
 type Variant = "primary" | "secondary" | "tertiary" | "destructive";
-type Size = "sm" | "md";
+type Size = "sm" | "md" | "lg"; // Added "lg"
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -21,11 +19,12 @@ const base =
 const sizes: Record<Size, string> = {
   sm: "h-9 px-3.5 text-sm",
   md: "h-11 px-5 text-base",
+  lg: "h-12 px-7 text-base", // Added lg size with taller height and more padding
 };
 
 const variants: Record<Variant, string> = {
   primary:
-  "bg-primary text-on-primary hover:bg-primary-hover" +
+    "bg-primary text-on-primary hover:bg-primary-hover " + // Fixed: added space after hover:bg-primary-hover
     "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
   secondary:
     "bg-transparent text-text border border-border-strong hover:bg-surface " +
