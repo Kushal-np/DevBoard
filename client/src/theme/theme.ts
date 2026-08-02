@@ -15,6 +15,7 @@ export interface ThemeColors {
   overlay: string;
   accent: string;
 }
+
 export interface Theme {
   colors: ThemeColors;
 }

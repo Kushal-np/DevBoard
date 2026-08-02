@@ -1,6 +1,11 @@
 import { createContext, useCallback, useState, type ReactNode } from "react";
 import type { ITextPost } from "../types/TextPost";
-import { getPostsFeed, createTextPost, likeTextPost } from "../api/services/textPost.service";
+import {
+  getPostsFeed,
+  createTextPost,
+  likeTextPost,
+  deleteTextPost,
+} from "../api/services/textPost.service";
 
 interface TextPostContextType {
   posts: ITextPost[];
@@ -8,6 +13,7 @@ interface TextPostContextType {
   getPosts: () => Promise<void>;
   addPost: (formData: FormData) => Promise<ITextPost>;
   toggleLike: (id: string) => Promise<void>;
+  removePost: (id: string) => Promise<void>;
 }
 
 export const TextPostContext = createContext<TextPostContextType | undefined>(undefined);
@@ -45,8 +51,21 @@ export const TextPostProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const removePost = useCallback(async (id: string) => {
+    const prev = posts;
+    setPosts((p) => p.filter((post) => post._id !== id));
+    try {
+      await deleteTextPost(id);
+    } catch (err) {
+      console.error(err);
+      setPosts(prev);
+    }
+  }, [posts]);
+
   return (
-    <TextPostContext.Provider value={{ posts, isLoading, getPosts, addPost, toggleLike }}>
+    <TextPostContext.Provider
+      value={{ posts, isLoading, getPosts, addPost, toggleLike, removePost }}
+    >
       {children}
     </TextPostContext.Provider>
   );

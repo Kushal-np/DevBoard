@@ -25,3 +25,13 @@ export const likeTextPost = async (
   const res = await apiClient.post(TEXT_POST_ENDPOINTS.LIKE(id));
   return res.data;
 };
+
+export const deleteTextPost = async (id: string): Promise<{ success: boolean }> => {
+  const res = await apiClient.delete(TEXT_POST_ENDPOINTS.DELETE(id));
+  return res.data;
+};
+
+export const getLikedTextPosts = async (): Promise<{ posts: ITextPost[] }> => {
+  const res = await apiClient.get(TEXT_POST_ENDPOINTS.LIKED);
+  return res.data;
+};

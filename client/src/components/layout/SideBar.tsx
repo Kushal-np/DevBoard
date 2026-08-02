@@ -1,11 +1,8 @@
-import { type LucideIcon, Home, Bookmark, Heart, MessageCircle, Bell, Settings, User, LogOut } from "lucide-react";
+import { type LucideIcon, Home, Bookmark, Heart, MessageCircle, Bell, Settings, User, LogOut, Search } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../theme/useTheme";
 import { useNotification } from "../../hooks/useNotification";
-
-import blackLogo from "../../assets/black.png";
-import whiteLogo from "../../assets/white.png";
 
 interface NavLinkItem {
   name: string;
@@ -18,10 +15,9 @@ const Sidebar = () => {
   const { theme } = useTheme();
   const { unreadCount } = useNotification();
 
-  const logo = theme === "dark" ? blackLogo : whiteLogo;
-
   const links: NavLinkItem[] = [
     { name: "Feed", path: "/feed", icon: Home },
+    { name: "Search", path: "/search", icon: Search },
     { name: "Bookmarks", path: "/bookmarks", icon: Bookmark },
     { name: "Likes", path: "/likes", icon: Heart },
     { name: "Chat", path: "/chat", icon: MessageCircle },
@@ -33,8 +29,14 @@ const Sidebar = () => {
     <>
       {/* ---------- DESKTOP RAIL ---------- */}
       <div className="hidden h-screen w-full flex-col px-3 py-6 md:flex">
-        <div className="mb-8 flex justify-center">
-          <img src={logo} alt="DevBoard" className="h-9 w-9 rounded-xl object-contain" />
+        <div className="mb-8 flex items-center gap-2 px-2">
+          <div
+            className={`flex h-9 w-9 items-center justify-center rounded-xl font-display text-sm font-bold ${
+              theme === "dark" ? "bg-white text-black" : "bg-black text-white"
+            }`}
+          >
+            DB
+          </div>
         </div>
 
         <div className="flex flex-col gap-1">
@@ -75,11 +77,7 @@ const Sidebar = () => {
           className="flex items-center gap-3 rounded-xl border border-border bg-background p-2.5 transition hover:border-text-secondary/30"
         >
           {user?.profile_url ? (
-            <img
-              src={user.profile_url}
-              className="h-9 w-9 shrink-0 rounded-full object-cover"
-              alt=""
-            />
+            <img src={user.profile_url} className="h-9 w-9 shrink-0 rounded-full object-cover" alt="" />
           ) : (
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
               <User size={17} />
@@ -88,9 +86,7 @@ const Sidebar = () => {
 
           <div className="min-w-0">
             <p className="truncate text-[13px] font-medium text-text">{user?.name}</p>
-            <p className="truncate font-mono text-[11px] text-text-secondary">
-              @{user?.username}
-            </p>
+            <p className="truncate font-mono text-[11px] text-text-secondary">@{user?.username}</p>
           </div>
         </NavLink>
 
@@ -105,38 +101,38 @@ const Sidebar = () => {
 
       {/* ---------- MOBILE BOTTOM TAB BAR ---------- */}
       <div className="safe-area-bottom fixed bottom-0 left-0 right-0 z-50 flex justify-between border-t border-border bg-surface/95 px-1 py-1.5 backdrop-blur-md md:hidden">
-        {links.map((item) => {
-          const Icon = item.icon;
-          const isNotifications = item.name === "Notifications";
+        {links
+          .filter((l) => l.name !== "Search")
+          .map((item) => {
+            const Icon = item.icon;
+            const isNotifications = item.name === "Notifications";
 
-          return (
-            <NavLink
-              key={item.name}
-              to={item.path}
-              className={({ isActive }: { isActive: boolean }) =>
-                `relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-lg py-2 transition ${
-                  isActive ? "text-primary" : "text-text-secondary/70"
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <span className="relative">
-                    <Icon size={21} strokeWidth={1.75} />
-                    {isNotifications && unreadCount > 0 && (
-                      <span className="absolute -right-1.5 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-danger px-1 text-[8px] font-bold text-white">
-                        {unreadCount > 9 ? "9+" : unreadCount}
-                      </span>
-                    )}
-                  </span>
-                  {isActive && (
-                    <span className="absolute -bottom-0.5 h-1 w-1 rounded-full bg-primary" />
-                  )}
-                </>
-              )}
-            </NavLink>
-          );
-        })}
+            return (
+              <NavLink
+                key={item.name}
+                to={item.path}
+                className={({ isActive }: { isActive: boolean }) =>
+                  `relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-lg py-2 transition ${
+                    isActive ? "text-primary" : "text-text-secondary/70"
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <span className="relative">
+                      <Icon size={21} strokeWidth={1.75} />
+                      {isNotifications && unreadCount > 0 && (
+                        <span className="absolute -right-1.5 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-danger px-1 text-[8px] font-bold text-white">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                      )}
+                    </span>
+                    {isActive && <span className="absolute -bottom-0.5 h-1 w-1 rounded-full bg-primary" />}
+                  </>
+                )}
+              </NavLink>
+            );
+          })}
 
         <NavLink
           to={`/profile/${user?.username}`}
@@ -157,9 +153,7 @@ const Sidebar = () => {
               ) : (
                 <User size={21} strokeWidth={1.75} />
               )}
-              {isActive && (
-                <span className="absolute -bottom-0.5 h-1 w-1 rounded-full bg-primary" />
-              )}
+              {isActive && <span className="absolute -bottom-0.5 h-1 w-1 rounded-full bg-primary" />}
             </>
           )}
         </NavLink>

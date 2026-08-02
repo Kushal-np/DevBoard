@@ -17,12 +17,15 @@ export const PROFILE_ENDPOINTS = {
   GET_PROFILE: (username: string) => `/profile/${username}`,
   EDIT: `/profile/edit`,
   CHANGE_PASSWORD: `/profile/change-password`,
+  DELETE_ACCOUNT: `/profile`,
 };
 
 export const POST_ENDPOINTS = {
   CREATE_POST: `project/create-post`,
   GET_POST: `project/get-post`,
   GET_INDIVIDUAL_POST: (postId: string) => `project/get-post/${postId}`,
+  UPDATE_POST: (postId: string) => `project/get-post/${postId}`,
+  DELETE_POST: (postId: string) => `project/get-post/${postId}`,
   GET_FEED: `project/getFeed`,
   STAR_POST: (id: string) => `project/${id}/star`,
   GET_STARRED: `project/star`,
@@ -34,8 +37,10 @@ export const POST_ENDPOINTS = {
 export const TEXT_POST_ENDPOINTS = {
   CREATE: `/posts`,
   FEED: `/posts/feed`,
+  LIKED: `/posts/liked`,
   BY_USER: (userId: string) => `/posts/user/${userId}`,
   LIKE: (id: string) => `/posts/${id}/like`,
+  DELETE: (id: string) => `/posts/${id}`,
 };
 
 export const BOOKMARK_ENDPOINTS = {

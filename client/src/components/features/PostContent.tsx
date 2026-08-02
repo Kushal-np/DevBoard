@@ -311,9 +311,7 @@ const PostContent = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -406,9 +404,7 @@ const PostContent = () => {
       {feedback && (
         <div
           className={`mb-3 rounded-lg px-3 py-2 text-xs font-medium ${
-            feedback.type === "success"
-              ? "bg-success/10 text-success"
-              : "bg-danger/10 text-danger"
+            feedback.type === "success" ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
           }`}
         >
           {feedback.message}
@@ -594,9 +590,7 @@ const PostContent = () => {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-text-secondary">
-                  Status
-                </label>
+                <label className="mb-1.5 block text-xs font-medium text-text-secondary">Status</label>
                 <div className="inline-flex flex-wrap gap-1.5">
                   {STATUS_OPTIONS.map((opt) => (
                     <button

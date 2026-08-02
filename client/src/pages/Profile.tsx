@@ -8,12 +8,12 @@ import {
   UserCheck,
   MapPin,
   Edit3,
-  Code2,
   X,
   Heart,
   Clock,
   FolderGit2,
   MessageSquare,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useProfile } from "../hooks/useProfile";
@@ -92,7 +92,7 @@ const Profile = () => {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-text">
-        <p className="font-mono text-sm text-text-secondary">loading profile…</p>
+        <p className="text-sm text-text-secondary">Loading profile…</p>
       </div>
     );
   }
@@ -100,15 +100,14 @@ const Profile = () => {
   if (!userProfile) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-text">
-        <p className="font-mono text-sm text-text-secondary">404 — user not found</p>
+        <p className="text-sm text-text-secondary">This user couldn't be found.</p>
       </div>
     );
   }
 
   const isMyProfile = !!user && user._id === userProfile._id;
 
-  const currentlyFollowing =
-    !!user && followers.some((f) => String(f._id) === String(user._id));
+  const currentlyFollowing = !!user && followers.some((f) => String(f._id) === String(user._id));
 
   const handleFollowClick = async () => {
     if (!isAuthenticated || !user) {
@@ -172,58 +171,55 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background text-text">
       {/* Cover */}
-      <div className="relative h-64 w-full overflow-hidden md:h-72">
+      <div className="relative h-52 w-full overflow-hidden md:h-64 md:rounded-b-3xl">
         {userProfile.cover_url ? (
           <img src={userProfile.cover_url} className="h-full w-full object-cover" alt="cover" />
         ) : (
-          <div className="relative h-full w-full bg-gradient-to-br from-primary/25 via-surface to-accent/20">
+          <div className="relative h-full w-full bg-gradient-to-br from-primary via-primary/40 to-accent/30">
             <div
-              className="absolute inset-0 opacity-[0.15]"
+              className="absolute inset-0 opacity-[0.12]"
               style={{
-                backgroundImage: "radial-gradient(currentColor 1px, transparent 1px)",
-                backgroundSize: "22px 22px",
+                backgroundImage:
+                  "radial-gradient(circle, currentColor 1px, transparent 1px)",
+                backgroundSize: "18px 18px",
               }}
             />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-black/10" />
       </div>
 
-      <main className="mx-auto max-w-6xl px-6 pb-16">
-        <section className="relative -mt-20 rounded-3xl border border-border bg-surface p-6 shadow-xl md:-mt-24 md:p-8">
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div className="flex flex-col gap-5 md:flex-row md:items-end">
-              <div className="relative w-fit">
-                {userProfile.profile_url ? (
-                  <img
-                    src={userProfile.profile_url}
-                    alt={userProfile.username}
-                    className="h-32 w-32 rounded-2xl border-4 border-surface object-cover shadow-lg md:h-36 md:w-36"
-                  />
-                ) : (
-                  <div className="flex h-32 w-32 items-center justify-center rounded-2xl border-4 border-surface bg-primary text-4xl font-bold text-background shadow-lg md:h-36 md:w-36">
-                    {userProfile.name?.[0]?.toUpperCase() ?? "?"}
-                  </div>
-                )}
-              </div>
+      <main className="mx-auto max-w-5xl px-4 pb-16 md:px-6">
+        {/* Identity card — floats up over the cover */}
+        <section className="relative -mt-16 rounded-3xl bg-surface/95 p-6 shadow-xl ring-1 ring-border backdrop-blur md:-mt-20 md:p-8">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end">
+              {userProfile.profile_url ? (
+                <img
+                  src={userProfile.profile_url}
+                  alt={userProfile.username}
+                  className="h-28 w-28 rounded-full border-4 border-surface object-cover shadow-lg md:h-32 md:w-32"
+                />
+              ) : (
+                <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-surface bg-primary text-3xl font-bold text-white shadow-lg md:h-32 md:w-32">
+                  {userProfile.name?.[0]?.toUpperCase() ?? "?"}
+                </div>
+              )}
 
-              <div className="min-w-0">
-                <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{userProfile.name}</h1>
+              <div className="min-w-0 pb-1">
+                <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{userProfile.name}</h1>
 
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 font-mono text-xs text-text-secondary">
-                    <AtSign size={13} />
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-text-secondary">
+                  <span className="inline-flex items-center gap-1.5 text-sm">
+                    <AtSign size={14} />
                     {userProfile.username}
                   </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 font-mono text-xs text-text-secondary">
-                    <Mail size={13} />
+                  <span className="text-text-secondary/30">•</span>
+                  <span className="inline-flex items-center gap-1.5 text-sm">
+                    <Mail size={14} />
                     {userProfile.email}
                   </span>
                 </div>
-
-                <p className="mt-4 max-w-xl leading-relaxed text-text-secondary">
-                  {userProfile.bio || "Developer building cool things and contributing to the community."}
-                </p>
               </div>
             </div>
 
@@ -250,7 +246,7 @@ const Profile = () => {
                   disabled={isFollowLoading || !followListLoaded}
                   className={`flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${
                     currentlyFollowing
-                      ? "border border-border bg-background text-text hover:border-red-400/50 hover:text-red-500"
+                      ? "border border-border bg-background text-text hover:border-danger/50 hover:text-danger"
                       : "bg-primary text-background hover:bg-primary-hover"
                   }`}
                 >
@@ -270,143 +266,123 @@ const Profile = () => {
             )}
           </div>
 
-          <div className="mt-8 grid grid-cols-2 gap-3 border-t border-border pt-6">
-            <button onClick={() => setActiveList("followers")} className="text-left">
-              <Stat title="Followers" value={followerCount} />
+          {userProfile.bio && (
+            <p className="mt-5 max-w-2xl leading-relaxed text-text-secondary">{userProfile.bio}</p>
+          )}
+
+          <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-border pt-5">
+            <button
+              onClick={() => setActiveList("followers")}
+              className="flex items-center gap-1.5 rounded-full bg-background px-4 py-2 text-sm transition hover:bg-surface-hover"
+            >
+              <span className="font-bold text-text">{followerCount}</span>
+              <span className="text-text-secondary">Followers</span>
             </button>
-            <button onClick={() => setActiveList("following")} className="text-left">
-              <Stat title="Following" value={followingCount} />
+            <button
+              onClick={() => setActiveList("following")}
+              className="flex items-center gap-1.5 rounded-full bg-background px-4 py-2 text-sm transition hover:bg-surface-hover"
+            >
+              <span className="font-bold text-text">{followingCount}</span>
+              <span className="text-text-secondary">Following</span>
             </button>
+            <span className="flex items-center gap-1.5 rounded-full bg-background px-4 py-2 text-sm text-text-secondary">
+              <MapPin size={13} className="text-accent" />
+              Nepal
+            </span>
           </div>
         </section>
 
-        <section className="mt-8 grid gap-6 lg:grid-cols-3">
-          <div className="rounded-2xl border border-border bg-surface p-6">
-            <SectionLabel>About</SectionLabel>
-            <div className="mt-5 space-y-4 text-text-secondary">
-              <p className="flex items-center gap-3">
-                <MapPin size={17} className="shrink-0 text-accent" />
-                Nepal
-              </p>
-              <button
-                onClick={() => setActiveList("followers")}
-                className="flex items-center gap-3 text-left transition hover:text-text"
-              >
-                <Users size={17} className="shrink-0 text-accent" />
-                {followerCount} Followers
-              </button>
-              <button
-                onClick={() => setActiveList("following")}
-                className="flex items-center gap-3 text-left transition hover:text-text"
-              >
-                <UserPlus size={17} className="shrink-0 text-accent" />
-                {followingCount} Following
-              </button>
-            </div>
+        {/* Content */}
+        <section className="mt-6 rounded-3xl border border-border bg-surface overflow-hidden">
+          <div className="flex border-b border-border">
+            <button
+              onClick={() => setContentTab("projects")}
+              className={`flex flex-1 items-center justify-center gap-2 py-4 text-sm font-medium transition ${
+                contentTab === "projects"
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-text-secondary hover:text-text"
+              }`}
+            >
+              <FolderGit2 size={16} />
+              Projects
+              <span className="rounded-full bg-background px-1.5 text-xs">{userProjects.length}</span>
+            </button>
+            <button
+              onClick={() => setContentTab("posts")}
+              className={`flex flex-1 items-center justify-center gap-2 py-4 text-sm font-medium transition ${
+                contentTab === "posts"
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-text-secondary hover:text-text"
+              }`}
+            >
+              <MessageSquare size={16} />
+              Posts
+              <span className="rounded-full bg-background px-1.5 text-xs">{userPosts.length}</span>
+            </button>
           </div>
 
-          <div className="rounded-2xl border border-border bg-surface lg:col-span-2 overflow-hidden">
-            <div className="flex border-b border-border">
-              <button
-                onClick={() => setContentTab("projects")}
-                className={`flex flex-1 items-center justify-center gap-2 py-3.5 text-sm font-medium transition ${
-                  contentTab === "projects"
-                    ? "border-b-2 border-primary text-primary"
-                    : "text-text-secondary hover:text-text"
-                }`}
-              >
-                <FolderGit2 size={16} />
-                Projects
-              </button>
-              <button
-                onClick={() => setContentTab("posts")}
-                className={`flex flex-1 items-center justify-center gap-2 py-3.5 text-sm font-medium transition ${
-                  contentTab === "posts"
-                    ? "border-b-2 border-primary text-primary"
-                    : "text-text-secondary hover:text-text"
-                }`}
-              >
-                <MessageSquare size={16} />
-                Posts
-              </button>
-            </div>
-
-            <div className="p-6">
-              {isContentLoading ? (
-                <div className="space-y-3">
-                  {[0, 1].map((i) => (
-                    <div key={i} className="h-20 rounded-xl bg-background animate-pulse" />
-                  ))}
-                </div>
-              ) : contentTab === "projects" ? (
-                userProjects.length === 0 ? (
-                  <p className="text-center text-sm text-text-secondary py-10">
-                    No published projects yet.
-                  </p>
-                ) : (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {userProjects.map((project) => (
-                      <Link
-                        key={project._id}
-                        to={`/post/${project._id}`}
-                        className="group rounded-xl border border-border bg-background p-5 transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-lg"
-                      >
-                        <h3 className="text-base font-bold transition group-hover:text-accent">
-                          {project.title}
-                        </h3>
-                        <p className="mt-2 text-sm text-text-secondary line-clamp-2">
-                          {project.description}
-                        </p>
-                        <div className="mt-4 flex items-center gap-3 text-xs text-text-secondary">
-                          <span className="flex items-center gap-1">
-                            <Heart size={12} />
-                            {project.starCount}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock size={12} />
-                            {timeAgo(project.createdAt)}
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )
-              ) : userPosts.length === 0 ? (
-                <p className="text-center text-sm text-text-secondary py-10">
-                  No posts yet.
-                </p>
+          <div className="p-6">
+            {isContentLoading ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                {[0, 1].map((i) => (
+                  <div key={i} className="h-28 rounded-2xl bg-background animate-pulse" />
+                ))}
+              </div>
+            ) : contentTab === "projects" ? (
+              userProjects.length === 0 ? (
+                <EmptyState icon={<FolderGit2 size={22} />} text="No published projects yet." />
               ) : (
-                <div className="space-y-4">
-                  {userPosts.map((post) => (
-                    <div
-                      key={post._id}
-                      className="rounded-xl border border-border bg-background p-4"
+                <div className="grid gap-4 md:grid-cols-2">
+                  {userProjects.map((project) => (
+                    <Link
+                      key={project._id}
+                      to={`/post/${project._id}`}
+                      className="group rounded-2xl border border-border bg-background p-5 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"
                     >
-                      <p className="text-sm text-text leading-relaxed whitespace-pre-wrap">
-                        {post.text}
+                      <h3 className="text-base font-bold transition group-hover:text-primary">
+                        {project.title}
+                      </h3>
+                      <p className="mt-2 line-clamp-2 text-sm text-text-secondary">
+                        {project.description}
                       </p>
-                      {post.imageUrl && (
-                        <img
-                          src={post.imageUrl}
-                          alt=""
-                          className="mt-3 w-full max-h-72 rounded-lg object-cover"
-                        />
-                      )}
-                      <div className="mt-3 flex items-center gap-3 text-xs text-text-secondary">
+                      <div className="mt-4 flex items-center gap-3 text-xs text-text-secondary">
                         <span className="flex items-center gap-1">
                           <Heart size={12} />
-                          {post.likeCount}
+                          {project.starCount}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock size={12} />
-                          {timeAgo(post.createdAt)}
+                          {timeAgo(project.createdAt)}
                         </span>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
-              )}
-            </div>
+              )
+            ) : userPosts.length === 0 ? (
+              <EmptyState icon={<MessageSquare size={22} />} text="No posts yet." />
+            ) : (
+              <div className="space-y-4">
+                {userPosts.map((post) => (
+                  <div key={post._id} className="rounded-2xl border border-border bg-background p-4">
+                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-text">{post.text}</p>
+                    {post.imageUrl && (
+                      <img src={post.imageUrl} alt="" className="mt-3 max-h-72 w-full rounded-lg object-cover" />
+                    )}
+                    <div className="mt-3 flex items-center gap-3 text-xs text-text-secondary">
+                      <span className="flex items-center gap-1">
+                        <Heart size={12} />
+                        {post.likeCount}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} />
+                        {timeAgo(post.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>
@@ -423,6 +399,17 @@ const Profile = () => {
     </div>
   );
 };
+
+function EmptyState({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2 py-14 text-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background text-text-secondary/50">
+        {icon}
+      </div>
+      <p className="text-sm text-text-secondary">{text}</p>
+    </div>
+  );
+}
 
 function FollowListModal({
   title,
@@ -444,7 +431,10 @@ function FollowListModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <h3 className="font-bold">{title}</h3>
+          <h3 className="flex items-center gap-2 font-bold">
+            <Sparkles size={15} className="text-primary" />
+            {title}
+          </h3>
           <button
             onClick={onClose}
             className="rounded-full p-1 text-text-secondary transition hover:bg-background hover:text-text"
@@ -455,9 +445,9 @@ function FollowListModal({
 
         <div className="max-h-[calc(70vh-60px)] overflow-y-auto p-2">
           {loading ? (
-            <p className="p-4 text-center font-mono text-sm text-text-secondary">loading…</p>
+            <p className="p-4 text-center text-sm text-text-secondary">Loading…</p>
           ) : users.length === 0 ? (
-            <p className="p-4 text-center font-mono text-sm text-text-secondary">No {title.toLowerCase()} yet</p>
+            <p className="p-4 text-center text-sm text-text-secondary">No {title.toLowerCase()} yet</p>
           ) : (
             users.map((u) => (
               <button
@@ -474,31 +464,13 @@ function FollowListModal({
                 )}
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{u.name}</p>
-                  <p className="truncate font-mono text-xs text-text-secondary">@{u.username}</p>
+                  <p className="truncate text-xs text-text-secondary">@{u.username}</p>
                 </div>
               </button>
             ))
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-widest text-text-secondary">
-      <span className="text-accent">//</span>
-      {children}
-    </h2>
-  );
-}
-
-function Stat({ title, value }: { title: string; value: number | string }) {
-  return (
-    <div className="rounded-xl border border-border bg-background px-5 py-4 text-center transition hover:border-accent/40">
-      <h3 className="text-2xl font-bold tabular-nums">{value}</h3>
-      <p className="mt-1 font-mono text-xs uppercase tracking-wide text-text-secondary">{title}</p>
     </div>
   );
 }

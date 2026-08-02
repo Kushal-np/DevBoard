@@ -64,8 +64,11 @@ const NotificationBell = () => {
         )}
       </button>
 
+      {/* Everything below, including "See all notifications", only renders
+          while the dropdown is open — previously the footer link leaked
+          outside this block and stayed visible even when closed. */}
       {open && (
-        <div className="absolute right-0 z-50 mt-2 max-h-96 w-80 overflow-y-auto rounded-2xl border border-border bg-surface shadow-xl">
+        <div className="absolute right-0 z-50 mt-2 max-h-[28rem] w-80 overflow-hidden rounded-2xl border border-border bg-surface shadow-xl flex flex-col">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <h3 className="font-semibold text-text">Notifications</h3>
             {unreadCount > 0 && (
@@ -75,57 +78,60 @@ const NotificationBell = () => {
             )}
           </div>
 
-          {notifications.length === 0 ? (
-            <p className="p-6 text-center text-sm text-text-secondary">No notifications yet.</p>
-          ) : (
-            notifications.map((n) => {
-              const Icon = iconFor(n.type);
+          <div className="max-h-96 overflow-y-auto">
+            {notifications.length === 0 ? (
+              <p className="p-6 text-center text-sm text-text-secondary">No notifications yet.</p>
+            ) : (
+              notifications.slice(0, 8).map((n) => {
+                const Icon = iconFor(n.type);
 
-              return (
-                <Link
-                  key={n._id}
-                  to={notificationHref(n)}
-                  onClick={() => {
-                    if (!n.read) markAsRead(n._id);
-                    setOpen(false);
-                  }}
-                  className={`flex items-start gap-3 px-4 py-3 transition hover:bg-background ${
-                    !n.read ? "bg-primary/5" : ""
-                  }`}
-                >
-                  {n.senderId?.profile_url ? (
-                    <img src={n.senderId.profile_url} className="h-9 w-9 shrink-0 rounded-full object-cover" />
-                  ) : (
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                      {n.senderId?.name?.[0]?.toUpperCase() ?? "?"}
+                return (
+                  <Link
+                    key={n._id}
+                    to={notificationHref(n)}
+                    onClick={() => {
+                      if (!n.read) markAsRead(n._id);
+                      setOpen(false);
+                    }}
+                    className={`flex items-start gap-3 px-4 py-3 transition hover:bg-background ${
+                      !n.read ? "bg-primary/5" : ""
+                    }`}
+                  >
+                    {n.senderId?.profile_url ? (
+                      <img src={n.senderId.profile_url} className="h-9 w-9 shrink-0 rounded-full object-cover" />
+                    ) : (
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                        {n.senderId?.name?.[0]?.toUpperCase() ?? "?"}
+                      </div>
+                    )}
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm text-text">
+                        <span className="font-medium">{n.senderId?.name}</span> {n.text}
+                      </p>
+                      <p className="mt-0.5 text-xs text-text-secondary">{timeAgo(n.createdAt)}</p>
                     </div>
-                  )}
 
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-text">
-                      <span className="font-medium">{n.senderId?.name}</span> {n.text}
-                    </p>
-                    <p className="mt-0.5 text-xs text-text-secondary">{timeAgo(n.createdAt)}</p>
-                  </div>
+                    <Icon size={14} className="mt-1 shrink-0 text-text-secondary" />
 
-                  <Icon size={14} className="mt-1 shrink-0 text-text-secondary" />
+                    {!n.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />}
+                  </Link>
+                );
+              })
+            )}
+          </div>
 
-                  {!n.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />}
-                </Link>
-              );
-            })
+          {notifications.length > 0 && (
+            <Link
+              to="/notifications"
+              onClick={() => setOpen(false)}
+              className="block border-t border-border px-4 py-3 text-center text-sm text-primary hover:underline"
+            >
+              See all notifications
+            </Link>
           )}
         </div>
       )}
-      {notifications.length > 0 && (
-  <Link
-    to="/notifications"
-    onClick={() => setOpen(false)}
-    className="block border-t border-border px-4 py-3 text-center text-sm text-primary hover:underline"
-  >
-    See all notifications
-  </Link>
-)}
     </div>
   );
 };

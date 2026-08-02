@@ -14,6 +14,7 @@ const CreateTextPost = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -25,6 +26,17 @@ const CreateTextPost = () => {
   const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be under 5MB.");
+      return;
+    }
+
+    setError(null);
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   };
@@ -37,6 +49,7 @@ const CreateTextPost = () => {
 
   const resetAndClose = () => {
     setText("");
+    setError(null);
     removeImage();
     setIsOpen(false);
   };
@@ -46,6 +59,7 @@ const CreateTextPost = () => {
     if (!trimmed || isSubmitting) return;
 
     setIsSubmitting(true);
+    setError(null);
     try {
       const formData = new FormData();
       formData.append("text", trimmed);
@@ -55,6 +69,7 @@ const CreateTextPost = () => {
       resetAndClose();
     } catch (err) {
       console.error(err);
+      setError("Couldn't publish your post. Try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -75,9 +90,7 @@ const CreateTextPost = () => {
           </div>
         )}
 
-        <span className="flex-1 text-sm text-text-secondary">
-          What are you building today?
-        </span>
+        <span className="flex-1 text-sm text-text-secondary">What's on your mind today?</span>
 
         <Pencil size={16} className="shrink-0 text-text-secondary" />
       </button>
@@ -105,10 +118,7 @@ const CreateTextPost = () => {
             <div className="p-5">
               <div className="flex gap-3">
                 {user?.profile_url ? (
-                  <img
-                    src={user.profile_url}
-                    className="h-10 w-10 shrink-0 rounded-full object-cover"
-                  />
+                  <img src={user.profile_url} className="h-10 w-10 shrink-0 rounded-full object-cover" />
                 ) : (
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
                     {getInitials(user?.name)}
@@ -125,10 +135,12 @@ const CreateTextPost = () => {
                 autoFocus
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="What are you building today?"
+                placeholder="What's on your mind today?"
                 rows={4}
                 className="mt-4 w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-text outline-none focus:border-primary"
               />
+
+              {error && <p className="mt-2 text-xs text-danger">{error}</p>}
 
               {imagePreview && (
                 <div className="relative mt-3 w-fit">

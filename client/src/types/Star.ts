@@ -1,4 +1,4 @@
-export interface IStar{
-    user: string[] , 
-    project:string[],
+export interface IStar {
+  user: string[];
+  project: string[];
 }

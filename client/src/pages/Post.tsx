@@ -1,11 +1,12 @@
 // src/pages/Post.tsx
 
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Star, Send } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Star, Send, Eye, Share2, Check, Trash2, Pencil } from "lucide-react";
 import apiClient from "../api/axiosConfig";
 import { POST_ENDPOINTS, COMMENT_ENDPOINTS } from "../api/endpoints";
 import { useAuth } from "../hooks/useAuth";
+import { useFeed } from "../hooks/useFeed";
 
 interface IComment {
   _id: string;
@@ -22,12 +23,15 @@ interface IComment {
 const Post = () => {
   const { postId } = useParams<{ postId: string }>();
   const { user } = useAuth();
+  const { DeletePost } = useFeed();
+  const navigate = useNavigate();
 
   const [post, setPost] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const [liked, setLiked] = useState(false);
   const [starCount, setStarCount] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   const [comments, setComments] = useState<IComment[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(true);
@@ -81,12 +85,7 @@ const Post = () => {
 
   const getInitials = (name?: string) => {
     if (!name) return "?";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase();
+    return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
   };
 
   const handleLikeClick = async () => {
@@ -107,6 +106,26 @@ const Post = () => {
     }
   };
 
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      window.prompt("Copy this link:", window.location.href);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!postId || !window.confirm("Delete this project? This can't be undone.")) return;
+    try {
+      await DeletePost(postId);
+      navigate("/feed");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleCommentSubmit = async () => {
     const trimmed = commentText.trim();
     if (!trimmed || !postId || isSubmitting) return;
@@ -115,9 +134,7 @@ const Post = () => {
     setCommentError(null);
 
     try {
-      const res = await apiClient.post(COMMENT_ENDPOINTS.CREATE(postId), {
-        text: trimmed,
-      });
+      const res = await apiClient.post(COMMENT_ENDPOINTS.CREATE(postId), { text: trimmed });
 
       const newComment: IComment = res.data?.comment ?? {
         _id: crypto.randomUUID(),
@@ -166,22 +183,19 @@ const Post = () => {
 
   const author = post.userId;
   const profileHref = author?.username ? `/profile/${author.username}` : null;
+  const isMine = !!user?._id && author?._id === user._id;
 
   return (
     <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-xl mx-auto space-y-4">
         {/* POST CARD */}
         <article className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
-          {/* USER HEADER */}
           <div className="flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-3">
               {profileHref ? (
                 <Link to={profileHref}>
                   {author?.profile_url ? (
-                    <img
-                      src={author.profile_url}
-                      className="w-11 h-11 rounded-full object-cover ring-1 ring-border"
-                    />
+                    <img src={author.profile_url} className="w-11 h-11 rounded-full object-cover ring-1 ring-border" />
                   ) : (
                     <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-white font-bold">
                       {getInitials(author?.name)}
@@ -196,64 +210,51 @@ const Post = () => {
 
               <div>
                 {profileHref ? (
-                  <Link
-                    to={profileHref}
-                    className="text-text font-semibold hover:text-primary transition"
-                  >
+                  <Link to={profileHref} className="text-text font-semibold hover:text-primary transition">
                     {author?.name || "anonymous"}
                   </Link>
                 ) : (
-                  <h3 className="text-text font-semibold">
-                    {author?.name || "anonymous"}
-                  </h3>
+                  <h3 className="text-text font-semibold">{author?.name || "anonymous"}</h3>
                 )}
-
-                <p className="text-sm text-text-secondary">
-                  @{author?.username || "unknown"}
-                </p>
+                <p className="text-sm text-text-secondary">@{author?.username || "unknown"}</p>
               </div>
             </div>
 
-            <span className="text-xs text-text-secondary">
-              {new Date(post.createdAt).toLocaleDateString()}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-text-secondary">
+                {new Date(post.createdAt).toLocaleDateString()}
+              </span>
+              {isMine && (
+                <button
+                  onClick={handleDelete}
+                  aria-label="Delete project"
+                  className="rounded-full p-1.5 text-text-secondary transition hover:bg-danger/10 hover:text-danger"
+                >
+                  <Trash2 size={15} />
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* CONTENT */}
           <div className="px-5 space-y-4">
-            <h1 className="text-xl font-display font-semibold text-text">
-              {post.title}
-            </h1>
-
-            <p className="text-text-secondary leading-relaxed">
-              {post.description}
-            </p>
+            <h1 className="text-xl font-display font-semibold text-text">{post.title}</h1>
+            <p className="text-text-secondary leading-relaxed">{post.description}</p>
           </div>
 
-          {/* IMAGE */}
           {post.thumbnailUrl && (
             <div className="mt-5 w-full">
-              <img
-                src={post.thumbnailUrl}
-                alt={post.title}
-                className="w-full max-h-[450px] object-cover"
-              />
+              <img src={post.thumbnailUrl} alt={post.title} className="w-full max-h-[450px] object-cover" />
             </div>
           )}
 
-          {/* TECH STACK */}
           <div className="px-5 pt-5 flex flex-wrap gap-2">
             {post.techStack?.map((tech: string) => (
-              <span
-                key={tech}
-                className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20"
-              >
+              <span key={tech} className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                 {tech}
               </span>
             ))}
           </div>
 
-          {/* TAGS */}
           {post.tags?.length > 0 && (
             <div className="px-5 py-4 flex flex-wrap gap-2">
               {post.tags.map((tag: any) => (
@@ -264,12 +265,13 @@ const Post = () => {
             </div>
           )}
 
-          {/* STATS */}
           <div className="px-5 py-3 border-t border-border flex justify-end text-sm text-text-secondary">
-            <span>👁 {post.viewCount} views</span>
+            <span className="flex items-center gap-1">
+              <Eye size={14} />
+              {post.viewCount} views
+            </span>
           </div>
 
-          {/* ACTIONS */}
           <div className="border-t border-border px-5 py-3 flex justify-around">
             <button
               onClick={handleLikeClick}
@@ -281,19 +283,23 @@ const Post = () => {
               {starCount}
             </button>
 
-            <span className="text-text-secondary">
-              💬 {comments.length} comments
+            <span className="flex items-center gap-1.5 text-text-secondary">
+              <Send size={15} />
+              {comments.length} comments
             </span>
 
-            <button className="text-text-secondary hover:text-primary transition">
-              🔗 Share
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-1.5 text-text-secondary hover:text-primary transition"
+            >
+              {copied ? <Check size={16} className="text-success" /> : <Share2 size={16} />}
+              {copied ? "Copied" : "Share"}
             </button>
           </div>
         </article>
 
         {/* COMMENT SECTION */}
         <section className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
-          {/* INPUT */}
           <div className="flex items-end gap-2 p-4 border-b border-border">
             <textarea
               value={commentText}
@@ -303,7 +309,6 @@ const Post = () => {
               rows={1}
               className="flex-1 resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-text outline-none focus:border-primary"
             />
-
             <button
               onClick={handleCommentSubmit}
               disabled={!commentText.trim() || isSubmitting}
@@ -313,16 +318,11 @@ const Post = () => {
             </button>
           </div>
 
-          {commentError && (
-            <p className="px-4 pt-3 text-xs text-danger">{commentError}</p>
-          )}
+          {commentError && <p className="px-4 pt-3 text-xs text-danger">{commentError}</p>}
 
-          {/* LIST */}
           <div className="p-4 space-y-4">
             {commentsLoading ? (
-              <p className="text-center text-sm text-text-secondary">
-                Loading comments...
-              </p>
+              <p className="text-center text-sm text-text-secondary">Loading comments...</p>
             ) : comments.length === 0 ? (
               <p className="text-center text-sm text-text-secondary">
                 No comments yet. Be the first to say something.
@@ -330,19 +330,14 @@ const Post = () => {
             ) : (
               comments.map((comment) => {
                 const commenter = comment.userId;
-                const commenterHref = commenter?.username
-                  ? `/profile/${commenter.username}`
-                  : null;
+                const commenterHref = commenter?.username ? `/profile/${commenter.username}` : null;
 
                 return (
                   <div key={comment._id} className="flex items-start gap-3">
                     {commenterHref ? (
                       <Link to={commenterHref}>
                         {commenter?.profile_url ? (
-                          <img
-                            src={commenter.profile_url}
-                            className="h-9 w-9 shrink-0 rounded-full object-cover"
-                          />
+                          <img src={commenter.profile_url} className="h-9 w-9 shrink-0 rounded-full object-cover" />
                         ) : (
                           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
                             {getInitials(commenter?.name)}
@@ -357,21 +352,13 @@ const Post = () => {
 
                     <div className="min-w-0">
                       {commenterHref ? (
-                        <Link
-                          to={commenterHref}
-                          className="text-sm font-semibold text-text hover:text-primary transition"
-                        >
+                        <Link to={commenterHref} className="text-sm font-semibold text-text hover:text-primary transition">
                           {commenter?.name || "anonymous"}
                         </Link>
                       ) : (
-                        <p className="text-sm font-semibold text-text">
-                          {commenter?.name || "anonymous"}
-                        </p>
+                        <p className="text-sm font-semibold text-text">{commenter?.name || "anonymous"}</p>
                       )}
-
-                      <p className="text-sm text-text-secondary break-words">
-                        {comment.text}
-                      </p>
+                      <p className="text-sm text-text-secondary break-words">{comment.text}</p>
                     </div>
                   </div>
                 );

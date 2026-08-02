@@ -1,9 +1,4 @@
-import {
-  createContext,
-  useState,
-  useEffect,
-  type ReactNode,
-} from "react";
+import { createContext, useState, useEffect, type ReactNode } from "react";
 
 import type { IUser } from "../types/Auth";
 
@@ -36,21 +31,17 @@ interface AuthContextType {
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  setUser: (user: IUser | null) => void;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
-);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<IUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLogging , setIsLogging] = useState(false);
-  const [isRegistering , setIsRegistering] = useState(false);
+  const [isLogging, setIsLogging] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+
   async function refreshUser() {
     try {
       const response = await getCurrentUser();
@@ -62,31 +53,21 @@ export function AuthProvider({
 
   async function login(data: LoginData) {
     setIsLogging(true);
-    try{
-
-        console.log("1. login() called");
-        
-        await loginUser(data);
-        
-        console.log("2. loginUser finished");
-        
-        await refreshUser();
-        
-        console.log("3. refreshUser finished");
-    }
-    finally{
-        setIsLogging(false);
+    try {
+      await loginUser(data);
+      await refreshUser();
+    } finally {
+      setIsLogging(false);
     }
   }
 
   async function register(data: RegisterData) {
-    setIsRegistering(true)
-    try{
-        await registerUser(data);
-        await refreshUser();
-    }
-    finally{
-        setIsRegistering(false);
+    setIsRegistering(true);
+    try {
+      await registerUser(data);
+      await refreshUser();
+    } finally {
+      setIsRegistering(false);
     }
   }
 
@@ -119,6 +100,7 @@ export function AuthProvider({
         register,
         logout,
         refreshUser,
+        setUser,
       }}
     >
       {children}

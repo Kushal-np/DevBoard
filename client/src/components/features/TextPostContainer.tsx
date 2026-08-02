@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Clock } from "lucide-react";
+import { Heart, Clock, Trash2 } from "lucide-react";
 import { useTextPost } from "../../hooks/useTextPost";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -23,15 +23,26 @@ const getInitials = (name?: string) => {
 };
 
 const TextPostContainer = () => {
-  const { posts, isLoading, getPosts, toggleLike } = useTextPost();
+  const { posts, isLoading, getPosts, toggleLike, removePost } = useTextPost();
   const { user } = useAuth();
 
   useEffect(() => {
     getPosts();
   }, [getPosts]);
 
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Delete this post?")) return;
+    await removePost(id);
+  };
+
   if (isLoading) {
-    return <div className="p-5 text-text-secondary">Loading posts...</div>;
+    return (
+      <div className="space-y-4 p-4">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-40 rounded-2xl bg-surface animate-pulse" />
+        ))}
+      </div>
+    );
   }
 
   if (posts.length === 0) {
@@ -48,48 +59,58 @@ const TextPostContainer = () => {
         const author = post.userId;
         const profileHref = author?.username ? `/profile/${author.username}` : null;
         const isLiked = !!user?._id && post.likes?.some((id) => String(id) === String(user._id));
+        const isMine = !!user?._id && author?._id === user._id;
 
         return (
           <article
             key={post._id}
             className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition"
           >
-            <div className="flex items-center gap-3 px-5 py-4">
-              {profileHref ? (
-                <Link to={profileHref}>
-                  {author?.profile_url ? (
-                    <img
-                      src={author.profile_url}
-                      className="h-11 w-11 rounded-full object-cover ring-1 ring-border"
-                    />
-                  ) : (
-                    <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                      {getInitials(author?.name)}
-                    </div>
-                  )}
-                </Link>
-              ) : (
-                <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                  {getInitials(author?.name)}
-                </div>
-              )}
-
-              <div>
+            <div className="flex items-center justify-between px-5 py-4">
+              <div className="flex items-center gap-3">
                 {profileHref ? (
-                  <Link
-                    to={profileHref}
-                    className="text-text font-semibold hover:text-primary transition"
-                  >
-                    {author?.name || "anonymous"}
+                  <Link to={profileHref}>
+                    {author?.profile_url ? (
+                      <img
+                        src={author.profile_url}
+                        className="h-11 w-11 rounded-full object-cover ring-1 ring-border"
+                      />
+                    ) : (
+                      <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                        {getInitials(author?.name)}
+                      </div>
+                    )}
                   </Link>
                 ) : (
-                  <span className="text-text font-semibold">{author?.name || "anonymous"}</span>
+                  <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                    {getInitials(author?.name)}
+                  </div>
                 )}
-                <p className="text-sm text-text-secondary flex items-center gap-1">
-                  <Clock size={12} />
-                  {timeAgo(post.createdAt)}
-                </p>
+
+                <div>
+                  {profileHref ? (
+                    <Link to={profileHref} className="text-text font-semibold hover:text-primary transition">
+                      {author?.name || "anonymous"}
+                    </Link>
+                  ) : (
+                    <span className="text-text font-semibold">{author?.name || "anonymous"}</span>
+                  )}
+                  <p className="text-sm text-text-secondary flex items-center gap-1">
+                    <Clock size={12} />
+                    {timeAgo(post.createdAt)}
+                  </p>
+                </div>
               </div>
+
+              {isMine && (
+                <button
+                  onClick={() => handleDelete(post._id)}
+                  aria-label="Delete post"
+                  className="rounded-full p-1.5 text-text-secondary transition hover:bg-danger/10 hover:text-danger"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
             </div>
 
             <div className="px-5 pb-4">

@@ -9,6 +9,11 @@ import {
   Share2,
   Clock,
   MoreHorizontal,
+  Pencil,
+  Trash2,
+  Bookmark as BookmarkIcon,
+  Link2,
+  Check,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useBookmark } from "../../hooks/useBookmark";
@@ -48,22 +53,38 @@ interface LikeState {
 }
 
 const PostContainer = () => {
-  const { posts, getPosts, isLoading, Likepost } = useFeed();
-  const { toggle } = useBookmark();
+  const { posts, getPosts, isLoading, Likepost, DeletePost } = useFeed();
+  const { bookmarks, toggle: toggleBookmark, fetchBookmarks } = useBookmark();
   const { user } = useAuth();
 
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [visiblePosts, setVisiblePosts] = useState(5);
 
   const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
 
   const [likeState, setLikeState] = useState<Record<string, LikeState>>({});
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [bouncingBookmarkId, setBouncingBookmarkId] = useState<string | null>(null);
 
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastPostRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     getPosts();
+    fetchBookmarks();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -160,14 +181,47 @@ const PostContainer = () => {
     }
   };
 
-  const safePosts = Array.isArray(posts)
-    ? posts.filter((post: any) => post?.title)
-    : [];
+  const handleShare = async (postId: string) => {
+    const url = `${window.location.origin}/post/${postId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(postId);
+      setTimeout(() => setCopiedId((id) => (id === postId ? null : id)), 1800);
+    } catch {
+      window.prompt("Copy this link:", url);
+    }
+  };
+
+  const handleDelete = async (postId: string) => {
+    setOpenMenuId(null);
+    if (!window.confirm("Delete this project? This can't be undone.")) return;
+    try {
+      await DeletePost(postId);
+    } catch {
+      // error already surfaced via console in context
+    }
+  };
+
+  const isBookmarked = (postId: string) => bookmarks.some((b: any) => b?._id === postId);
+
+  const handleBookmarkClick = (postId: string) => {
+    setBouncingBookmarkId(postId);
+    setTimeout(() => setBouncingBookmarkId((id) => (id === postId ? null : id)), 320);
+    toggleBookmark(postId);
+  };
+
+  const safePosts = Array.isArray(posts) ? posts.filter((post: any) => post?.title) : [];
 
   const displayedPosts = safePosts.slice(0, visiblePosts);
 
   if (isLoading) {
-    return <div className="p-5 text-text-secondary">Loading posts...</div>;
+    return (
+      <div className="space-y-4 p-4">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-64 rounded-2xl bg-surface animate-pulse" />
+        ))}
+      </div>
+    );
   }
 
   if (safePosts.length === 0) {
@@ -183,8 +237,9 @@ const PostContainer = () => {
       {displayedPosts.map((post: any, index: number) => {
         const postId = getPostId(post);
         const thumbnail = getThumbnailUrl(post);
-        const user = post.userId;
-        const profileHref = user?.username ? `/profile/${user.username}` : null;
+        const author = post.userId;
+        const profileHref = author?.username ? `/profile/${author.username}` : null;
+        const isMine = !!user?._id && author?._id === user._id;
 
         const state = likeState[postId] ?? {
           liked: false,
@@ -202,45 +257,88 @@ const PostContainer = () => {
               <div className="flex items-center gap-3">
                 {profileHref ? (
                   <Link to={profileHref}>
-                    {user?.profile_url ? (
+                    {author?.profile_url ? (
                       <img
-                        src={user.profile_url}
+                        src={author.profile_url}
                         className="h-11 w-11 rounded-full object-cover ring-1 ring-border"
                       />
                     ) : (
                       <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                        {getInitials(user?.name)}
+                        {getInitials(author?.name)}
                       </div>
                     )}
                   </Link>
                 ) : (
                   <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                    {getInitials(user?.name)}
+                    {getInitials(author?.name)}
                   </div>
                 )}
 
                 <div>
                   {profileHref ? (
-                    <Link
-                      to={profileHref}
-                      className="text-text font-semibold hover:text-primary transition"
-                    >
-                      {user?.name || "anonymous"}
+                    <Link to={profileHref} className="text-text font-semibold hover:text-primary transition">
+                      {author?.name || "anonymous"}
                     </Link>
                   ) : (
-                    <span className="text-text font-semibold">
-                      {user?.name || "anonymous"}
-                    </span>
+                    <span className="text-text font-semibold">{author?.name || "anonymous"}</span>
                   )}
 
                   <p className="text-sm text-text-secondary flex items-center gap-1">
                     <Clock size={12} />
                     {formatDate(post.createdAt)}
+                    {post.status === "draft" && (
+                      <span className="ml-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[10px] font-medium text-warning">
+                        Draft
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
 
-              <MoreHorizontal size={17} className="text-text-secondary" />
+              <div className="relative" ref={openMenuId === postId ? menuRef : undefined}>
+                <button
+                  onClick={() => setOpenMenuId((id) => (id === postId ? null : postId))}
+                  className="rounded-full p-1.5 text-text-secondary transition hover:bg-background hover:text-text"
+                  aria-label="Post options"
+                >
+                  <MoreHorizontal size={17} />
+                </button>
+
+                {openMenuId === postId && (
+                  <div className="absolute right-0 z-20 mt-1 w-40 overflow-hidden rounded-xl border border-border bg-surface shadow-xl">
+                    {isMine ? (
+                      <>
+                        <Link
+                          to={`/post/${postId}`}
+                          onClick={() => setOpenMenuId(null)}
+                          className="flex items-center gap-2 px-3 py-2.5 text-sm text-text transition hover:bg-background"
+                        >
+                          <Pencil size={14} />
+                          View / Edit
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(postId)}
+                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-danger transition hover:bg-danger/10"
+                        >
+                          <Trash2 size={14} />
+                          Delete
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setOpenMenuId(null);
+                          handleShare(postId);
+                        }}
+                        className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-text transition hover:bg-background"
+                      >
+                        <Link2 size={14} />
+                        Copy link
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* CONTENT */}
@@ -251,9 +349,7 @@ const PostContainer = () => {
                 </h2>
               </Link>
 
-              <p className="text-text-secondary leading-relaxed">
-                {post.description}
-              </p>
+              <p className="text-text-secondary leading-relaxed">{post.description}</p>
             </div>
 
             {thumbnail && !imageErrors[postId] && (
@@ -303,34 +399,58 @@ const PostContainer = () => {
               <button
                 onClick={() => handleLikeClick(postId)}
                 className={`flex items-center gap-1.5 transition ${
-                  state.liked
-                    ? "text-warning"
-                    : "text-text-secondary hover:text-warning"
+                  state.liked ? "text-warning" : "text-text-secondary hover:text-warning"
                 }`}
               >
                 <Star size={16} fill={state.liked ? "currentColor" : "none"} />
                 {state.count}
               </button>
 
-
-
               <button
-                onClick={() => toggle(post._id)}
-                className="text-text-secondary hover:text-primary transition"
+                onClick={() => setActiveCommentPostId(postId)}
+                className="flex items-center gap-1.5 text-text-secondary transition hover:text-primary"
               >
-                Bookmark
+                <MessageCircle size={16} />
+                {commentCounts[postId] ?? ""}
               </button>
 
-              <button className="flex items-center gap-1 text-text-secondary hover:text-primary transition">
-                <Share2 size={16} />
-                Share
+              <button
+                onClick={() => handleBookmarkClick(postId)}
+                className={`flex items-center gap-1.5 transition-colors ${
+                  isBookmarked(postId) ? "text-primary" : "text-text-secondary hover:text-primary"
+                }`}
+              >
+                <BookmarkIcon
+                  size={16}
+                  fill={isBookmarked(postId) ? "currentColor" : "none"}
+                  className={`transition-transform duration-300 ${
+                    bouncingBookmarkId === postId ? "scale-125" : "scale-100"
+                  }`}
+                />
+                {isBookmarked(postId) ? "Saved" : "Bookmark"}
+              </button>
+
+              <button
+                onClick={() => handleShare(postId)}
+                className="flex items-center gap-1 text-text-secondary transition hover:text-primary"
+              >
+                {copiedId === postId ? <Check size={16} className="text-success" /> : <Share2 size={16} />}
+                {copiedId === postId ? "Copied" : "Share"}
               </button>
             </div>
           </article>
         );
       })}
 
-
+      {activeCommentPostId && (
+        <CommentModal
+          postId={activeCommentPostId}
+          onClose={() => setActiveCommentPostId(null)}
+          onCommentCountChange={(count) =>
+            setCommentCounts((prev) => ({ ...prev, [activeCommentPostId]: count }))
+          }
+        />
+      )}
     </div>
   );
 };

@@ -15,9 +15,7 @@ interface GetBookmarksResponse {
 }
 
 export const toggleBookmark = async (projectId: string): Promise<ToggleBookmarkResponse> => {
-  const { data } = await apiClient.post<ToggleBookmarkResponse>(
-    BOOKMARK_ENDPOINTS.TOGGLE(projectId)
-  );
+  const { data } = await apiClient.post<ToggleBookmarkResponse>(BOOKMARK_ENDPOINTS.TOGGLE(projectId));
   return data;
 };
 

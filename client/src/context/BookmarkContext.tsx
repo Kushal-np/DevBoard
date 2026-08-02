@@ -28,8 +28,20 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggle = async (projectId: string) => {
-    await toggleBookmark(projectId);
-    await fetchBookmarks();
+    const wasBookmarked = bookmarks.some((b) => b._id === projectId);
+
+    // optimistic update
+    setBookmarks((prev) =>
+      wasBookmarked ? prev.filter((b) => b._id !== projectId) : prev
+    );
+
+    try {
+      await toggleBookmark(projectId);
+      await fetchBookmarks();
+    } catch (error) {
+      console.error(error);
+      await fetchBookmarks();
+    }
   };
 
   return (

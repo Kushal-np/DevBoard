@@ -31,10 +31,7 @@ const Chat = () => {
 
     setIsLoading(true);
 
-    Promise.all([
-      getConversationById(conversationId),
-      getMessages(conversationId),
-    ])
+    Promise.all([getConversationById(conversationId), getMessages(conversationId)])
       .then(([conversationData, messagesData]) => {
         setConversation(conversationData);
         setMessages(messagesData);
@@ -85,9 +82,7 @@ const Chat = () => {
       .toUpperCase();
   };
 
-  const otherParticipant = conversation?.participants.find(
-    (p) => p._id !== user?._id
-  );
+  const otherParticipant = conversation?.participants.find((p) => p._id !== user?._id);
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -106,10 +101,7 @@ const Chat = () => {
             <div className="h-4 w-32 rounded bg-surface animate-pulse" />
           </div>
         ) : otherParticipant ? (
-          <Link
-            to={`/profile/${otherParticipant.username}`}
-            className="flex items-center gap-3"
-          >
+          <Link to={`/profile/${otherParticipant.username}`} className="flex items-center gap-3">
             {otherParticipant.profile_url ? (
               <img
                 src={otherParticipant.profile_url}
@@ -124,9 +116,7 @@ const Chat = () => {
 
             <div>
               <p className="font-medium text-text">{otherParticipant.name}</p>
-              <p className="text-xs text-text-secondary">
-                @{otherParticipant.username}
-              </p>
+              <p className="text-xs text-text-secondary">@{otherParticipant.username}</p>
             </div>
           </Link>
         ) : (
@@ -143,15 +133,10 @@ const Chat = () => {
             const isMine = getSenderId(msg.senderId) === user?._id;
 
             return (
-              <div
-                key={msg._id}
-                className={`flex ${isMine ? "justify-end" : "justify-start"}`}
-              >
+              <div key={msg._id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
-                    isMine
-                      ? "bg-primary text-white"
-                      : "bg-surface border border-border text-text"
+                    isMine ? "bg-primary text-white" : "bg-surface border border-border text-text"
                   }`}
                 >
                   {msg.text}

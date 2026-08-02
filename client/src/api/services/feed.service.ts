@@ -1,4 +1,3 @@
-// src/api/services/feed.service.ts
 
 import type { IPost } from "../../types/Post";
 import apiClient from "../axiosConfig";
@@ -27,15 +26,11 @@ interface PostResponse {
 }
 
 export const createPost = async (formData: FormData): Promise<PostResponse> => {
-  const { data } = await apiClient.post<PostResponse>(
-    POST_ENDPOINTS.CREATE_POST,
-    formData,
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    }
-  );
+  const { data } = await apiClient.post<PostResponse>(POST_ENDPOINTS.CREATE_POST, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return data;
 };
 
@@ -46,9 +41,7 @@ interface GetPostsResponse {
 }
 
 export const GetPost = async (): Promise<GetPostsResponse> => {
-  const { data } = await apiClient.get<GetPostsResponse>(
-    POST_ENDPOINTS.GET_POST
-  );
+  const { data } = await apiClient.get<GetPostsResponse>(POST_ENDPOINTS.GET_POST);
   return data;
 };
 
@@ -64,17 +57,45 @@ export const getIndividualPost = async (value: string): Promise<IndividualPostRe
   return data;
 };
 
-
-interface StarResponse{
-    success:boolean ; 
-    starred : boolean;
-    starCount: number ; 
-    message:string;
+interface StarResponse {
+  success: boolean;
+  starred: boolean;
+  starCount: number;
+  message: string;
 }
-export const LikePost = async (value: string): Promise<StarResponse> => {
-  const { data } = await apiClient.post<StarResponse>(
-    POST_ENDPOINTS.STAR_POST(value)
-  );
 
+export const LikePost = async (value: string): Promise<StarResponse> => {
+  const { data } = await apiClient.post<StarResponse>(POST_ENDPOINTS.STAR_POST(value));
+  return data;
+};
+
+interface FeaturedResponse {
+  success: boolean;
+  projects: IPost[];
+  message: string;
+}
+
+export const getFeaturedPosts = async (): Promise<FeaturedResponse> => {
+  const { data } = await apiClient.get<FeaturedResponse>(POST_ENDPOINTS.GET_FEATURED);
+  return data;
+};
+
+export const getExplorePosts = async (): Promise<FeaturedResponse> => {
+  const { data } = await apiClient.get<FeaturedResponse>(POST_ENDPOINTS.GET_EXPLORE);
+  return data;
+};
+
+export const updatePost = async (
+  id: string,
+  formData: FormData
+): Promise<{ success: boolean; project: IPost; message: string }> => {
+  const { data } = await apiClient.patch(POST_ENDPOINTS.UPDATE_POST(id), formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+};
+
+export const deletePost = async (id: string): Promise<{ success: boolean; message: string }> => {
+  const { data } = await apiClient.delete(POST_ENDPOINTS.DELETE_POST(id));
   return data;
 };

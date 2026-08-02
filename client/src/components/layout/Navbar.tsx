@@ -3,6 +3,7 @@ import { Moon, Sun, Code2, LayoutDashboard, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../../theme/useTheme";
 import { useAuth } from "../../hooks/useAuth";
+import NotificationBell from "../Notification/NotificationBell";
 
 interface NavItem {
   name: string;
@@ -25,15 +26,12 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
         {/* Logo */}
-        <Link
-          to="/"
-          className="flex items-center gap-2 text-text transition hover:text-primary"
-        >
+        <Link to="/" className="flex items-center gap-2 text-text transition hover:text-primary">
           <Code2 className="h-7 w-7" />
           <span className="text-xl font-bold tracking-tight">DevBoard</span>
         </Link>
 
-        {/* Desktop Navigation (unchanged) */}
+        {/* Desktop Navigation */}
         <div className="hidden items-center gap-8 md:flex">
           {navLinks.map((link) => (
             <Link
@@ -48,28 +46,23 @@ const Navbar = () => {
 
         {/* Right Side */}
         <div className="flex items-center gap-2 md:gap-3">
+          {isAuthenticated && <NotificationBell />}
+
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="
-              flex h-10 w-10 items-center justify-center
-              rounded-xl border border-border bg-background text-text
-              transition hover:bg-surface-hover
-            "
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-background text-text transition hover:bg-surface-hover"
           >
             {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
           </button>
 
-          {/* Desktop-only auth buttons (unchanged) */}
+          {/* Desktop-only auth buttons */}
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <>
                 <Link
                   to="/dashboard"
-                  className="
-                    flex items-center gap-2 rounded-xl border border-border
-                    bg-background px-4 py-2 text-text transition hover:bg-surface-hover
-                  "
+                  className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-text transition hover:bg-surface-hover"
                 >
                   <LayoutDashboard size={18} />
                   Dashboard
@@ -77,33 +70,27 @@ const Navbar = () => {
 
                 <Link
                   to={`/profile/${user?.username}`}
-                  className="
-                    flex h-11 w-11 items-center justify-center overflow-hidden
-                    rounded-full border border-border bg-primary text-background
-                    font-semibold transition hover:scale-105
-                  "
+                  className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-border bg-primary text-background font-semibold transition hover:scale-105"
                 >
-                  <img src={user?.profile_url} alt="" />
+                  {user?.profile_url ? (
+                    <img src={user.profile_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    user?.name?.[0]?.toUpperCase() ?? "?"
+                  )}
                 </Link>
               </>
             ) : (
               <>
                 <Link
                   to="/login"
-                  className="
-                    rounded-xl border border-border bg-background px-4 py-2
-                    text-text transition hover:bg-surface-hover
-                  "
+                  className="rounded-xl border border-border bg-background px-4 py-2 text-text transition hover:bg-surface-hover"
                 >
                   Login
                 </Link>
 
                 <Link
                   to="/register"
-                  className="
-                    rounded-xl bg-primary px-4 py-2 font-medium text-background
-                    transition hover:bg-primary-hover
-                  "
+                  className="rounded-xl bg-primary px-4 py-2 font-medium text-background transition hover:bg-primary-hover"
                 >
                   Register
                 </Link>
@@ -114,11 +101,7 @@ const Navbar = () => {
           {/* Mobile hamburger toggle */}
           <button
             onClick={() => setMobileOpen((prev) => !prev)}
-            className="
-              flex h-10 w-10 items-center justify-center
-              rounded-xl border border-border bg-background text-text
-              transition hover:bg-surface-hover md:hidden
-            "
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-background text-text transition hover:bg-surface-hover md:hidden"
           >
             {mobileOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -155,11 +138,13 @@ const Navbar = () => {
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-text"
                 >
-                  <img
-                    src={user?.profile_url}
-                    alt=""
-                    className="h-6 w-6 rounded-full object-cover"
-                  />
+                  {user?.profile_url ? (
+                    <img src={user.profile_url} alt="" className="h-6 w-6 rounded-full object-cover" />
+                  ) : (
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">
+                      {user?.name?.[0]?.toUpperCase() ?? "?"}
+                    </div>
+                  )}
                   Profile
                 </Link>
               </>

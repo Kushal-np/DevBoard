@@ -18,16 +18,11 @@ const Register = () => {
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
     setError("");
 
     try {
@@ -35,10 +30,7 @@ const Register = () => {
       navigate("/feed");
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setError(
-          error.response?.data?.message ??
-            "Something went wrong"
-        );
+        setError(error.response?.data?.message ?? "Something went wrong");
       } else {
         setError("Something went wrong");
       }
@@ -47,17 +39,10 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
-
       <div className="w-full max-w-lg bg-surface border border-border rounded-2xl shadow-xl p-8">
-
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-text">
-            Create Account
-          </h1>
-
-          <p className="text-text-secondary mt-2">
-            Join DevBoard and start building amazing projects.
-          </p>
+          <h1 className="text-3xl font-bold text-text">Create Account</h1>
+          <p className="text-text-secondary mt-2">Join DevBoard and start building amazing projects.</p>
         </div>
 
         {error && (
@@ -67,12 +52,8 @@ const Register = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-
           <div>
-            <label className="block text-sm font-medium text-text mb-2">
-              Full Name
-            </label>
-
+            <label className="block text-sm font-medium text-text mb-2">Full Name</label>
             <input
               type="text"
               name="name"
@@ -84,10 +65,7 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text mb-2">
-              Username
-            </label>
-
+            <label className="block text-sm font-medium text-text mb-2">Username</label>
             <input
               type="text"
               name="username"
@@ -99,10 +77,7 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text mb-2">
-              Email
-            </label>
-
+            <label className="block text-sm font-medium text-text mb-2">Email</label>
             <input
               type="email"
               name="email"
@@ -114,10 +89,7 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text mb-2">
-              Password
-            </label>
-
+            <label className="block text-sm font-medium text-text mb-2">Password</label>
             <input
               type="password"
               name="passwordHash"
@@ -135,21 +107,15 @@ const Register = () => {
           >
             {isRegistering ? "Creating Account..." : "Create Account"}
           </button>
-
         </form>
 
         <div className="mt-8 text-center text-sm text-text-secondary">
           Already have an account?{" "}
-          <button
-            onClick={() => navigate("/login")}
-            className="text-link hover:underline"
-          >
+          <button onClick={() => navigate("/login")} className="text-link hover:underline">
             Login
           </button>
         </div>
-
       </div>
-
     </div>
   );
 };

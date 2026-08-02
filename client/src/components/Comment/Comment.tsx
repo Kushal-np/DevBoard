@@ -1,7 +1,7 @@
 // src/components/Comment/Comment.tsx
 
 import { useEffect, useState } from "react";
-import { X, Send } from "lucide-react";
+import { X, Send, Trash2 } from "lucide-react";
 import apiClient from "../../api/axiosConfig";
 import { COMMENT_ENDPOINTS } from "../../api/endpoints";
 import { useAuth } from "../../hooks/useAuth";
@@ -23,9 +23,10 @@ interface IComment {
 interface CommentModalProps {
   postId: string;
   onClose: () => void;
+  onCommentCountChange?: (count: number) => void;
 }
 
-const CommentModal = ({ postId, onClose }: CommentModalProps) => {
+const CommentModal = ({ postId, onClose, onCommentCountChange }: CommentModalProps) => {
   const { user } = useAuth();
 
   const [comments, setComments] = useState<IComment[]>([]);
@@ -44,7 +45,9 @@ const CommentModal = ({ postId, onClose }: CommentModalProps) => {
       try {
         const res = await apiClient.get(COMMENT_ENDPOINTS.LIST(postId));
         if (!cancelled) {
-          setComments(res.data?.comments ?? []);
+          const list = res.data?.comments ?? [];
+          setComments(list);
+          onCommentCountChange?.(list.length);
         }
       } catch (err) {
         if (!cancelled) {
@@ -98,12 +101,31 @@ const CommentModal = ({ postId, onClose }: CommentModalProps) => {
         createdAt: new Date().toISOString(),
       };
 
-      setComments((prev) => [newComment, ...prev]);
+      setComments((prev) => {
+        const next = [newComment, ...prev];
+        onCommentCountChange?.(next.length);
+        return next;
+      });
       setText("");
     } catch (err) {
       setError("Couldn't post your comment. Try again.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const prev = comments;
+    setComments((c) => {
+      const next = c.filter((cm) => cm._id !== id);
+      onCommentCountChange?.(next.length);
+      return next;
+    });
+    try {
+      await apiClient.delete(COMMENT_ENDPOINTS.DELETE(id));
+    } catch (err) {
+      setComments(prev);
+      onCommentCountChange?.(prev.length);
     }
   };
 
@@ -137,16 +159,14 @@ const CommentModal = ({ postId, onClose }: CommentModalProps) => {
         {/* LIST */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {isLoading ? (
-            <p className="text-center text-sm text-text-secondary">
-              Loading comments...
-            </p>
+            <p className="text-center text-sm text-text-secondary">Loading comments...</p>
           ) : comments.length === 0 ? (
             <p className="text-center text-sm text-text-secondary">
               No comments yet. Be the first to say something.
             </p>
           ) : (
             comments.map((comment) => (
-              <div key={comment._id} className="flex items-start gap-3">
+              <div key={comment._id} className="flex items-start gap-3 group">
                 {comment.userId?.profile_url ? (
                   <img
                     src={comment.userId.profile_url}
@@ -158,21 +178,27 @@ const CommentModal = ({ postId, onClose }: CommentModalProps) => {
                   </div>
                 )}
 
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-text">
                     {comment.userId?.name || "anonymous"}
                   </p>
-                  <p className="text-sm text-text-secondary break-words">
-                    {comment.text}
-                  </p>
+                  <p className="text-sm text-text-secondary break-words">{comment.text}</p>
                 </div>
+
+                {user?._id === comment.userId?._id && (
+                  <button
+                    onClick={() => handleDelete(comment._id)}
+                    aria-label="Delete comment"
+                    className="shrink-0 rounded-full p-1 text-text-secondary opacity-0 transition hover:bg-danger/10 hover:text-danger group-hover:opacity-100"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                )}
               </div>
             ))
           )}
 
-          {error && (
-            <p className="text-center text-xs text-danger">{error}</p>
-          )}
+          {error && <p className="text-center text-xs text-danger">{error}</p>}
         </div>
 
         {/* INPUT */}

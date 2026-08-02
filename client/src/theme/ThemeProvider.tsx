@@ -1,9 +1,4 @@
-import {
-  createContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useEffect, useState, type ReactNode } from "react";
 import { lightTheme } from "./lightTheme";
 import { darkTheme } from "./darkTheme";
 
@@ -14,22 +9,18 @@ interface ThemeContextType {
   toggleTheme: () => void;
 }
 
-export const ThemeContext = createContext<ThemeContextType | undefined>(
-  undefined
-);
+export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
-
-  // Read from localStorage when the app starts
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem("theme");
 
     if (savedTheme === "light" || savedTheme === "dark") {
       return savedTheme;
+    }
+
+    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      return "dark";
     }
 
     return "light";
@@ -39,24 +30,22 @@ export function ThemeProvider({
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   }
 
-  // Save whenever it changes
   useEffect(() => {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  // Apply CSS variables
   useEffect(() => {
     const root = document.documentElement;
 
-    const currentTheme =
-      theme === "light" ? lightTheme : darkTheme;
+    const currentTheme = theme === "light" ? lightTheme : darkTheme;
 
     Object.entries(currentTheme.colors).forEach(([key, value]) => {
-      const cssVariable =
-        "--" + key.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
-
+      const cssVariable = "--" + key.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
       root.style.setProperty(cssVariable, value);
     });
+
+    root.classList.toggle("light", theme === "light");
+    root.classList.toggle("dark", theme === "dark");
   }, [theme]);
 
   return (

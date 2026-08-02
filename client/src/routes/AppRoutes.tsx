@@ -1,6 +1,5 @@
 import { Routes, Route } from "react-router-dom";
 
-import LandingPage from "../pages/Landing";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Profile from "../pages/Profile";
@@ -17,14 +16,12 @@ import HomeRedirect from "../components/features/HomeRedirect";
 import Post from "../pages/Post";
 import ChatPage from "../pages/ChatPage";
 import Notifications from "../pages/Notifications";
-
+import Search from "../pages/Search";
 
 const AppRoutes = () => {
-
   return (
     <Routes>
       <Route element={<Layout />}>
-
         {/* Guest only */}
         <Route element={<PublicRoutes />}>
           <Route path="/" element={<HomeRedirect />} />
@@ -38,16 +35,29 @@ const AppRoutes = () => {
           <Route path="/settings" element={<Settings />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/likes" element={<Likes />} />
+          <Route path="/search" element={<Search />} />
           <Route path="/profile/:username" element={<Profile />} />
-          <Route path="/chat" element={<Chat />} />
           <Route path="/post/:postId" element={<Post />} />
+
+          {/* Chat is nested: /chat shows the conversation list, and
+              /chat/:conversationId opens a thread inside ChatPage's layout.
+              (Previously there was a duplicate standalone "/chat" route
+              pointing straight at <Chat/>, which shadowed this nested one
+              depending on route match order — removed.) */}
           <Route path="/chat" element={<ChatPage />}>
-            <Route index element={<div className="flex h-full items-center justify-center text-text-secondary">Select a conversation</div>} />
+            <Route
+              index
+              element={
+                <div className="hidden h-full items-center justify-center text-text-secondary md:flex">
+                  Select a conversation
+                </div>
+              }
+            />
             <Route path=":conversationId" element={<Chat />} />
           </Route>
+
           <Route path="/notifications" element={<Notifications />} />
         </Route>
-
       </Route>
     </Routes>
   );

@@ -1,6 +1,5 @@
 import {
   createContext,
-  useContext,
   useState,
   type ReactNode,
   type Dispatch,
@@ -8,11 +7,7 @@ import {
   useCallback,
 } from "react";
 
-import {
-  followUser,
-  unfollowUser,
-  getFollowData,
-} from "../api/services/follow.service";
+import { followUser, unfollowUser, getFollowData } from "../api/services/follow.service";
 import type { FollowUser } from "../types/follow";
 
 interface FollowContextType {
@@ -27,23 +22,18 @@ interface FollowContextType {
 
   refreshFollowData: (userId: string) => Promise<void>;
 
-  // Exposed so pages can do optimistic updates (flip UI instantly,
-  // then reconcile with refreshFollowData in the background).
   setFollowers: Dispatch<SetStateAction<FollowUser[]>>;
   setFollowing: Dispatch<SetStateAction<FollowUser[]>>;
 
   isLoading: boolean;
 }
 
-export const FollowContext = createContext<FollowContextType | undefined>(
-  undefined
-);
+export const FollowContext = createContext<FollowContextType | undefined>(undefined);
 
 export function FollowProvider({ children }: { children: ReactNode }) {
   const [following, setFollowing] = useState<FollowUser[]>([]);
   const [followers, setFollowers] = useState<FollowUser[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
 
   const refreshFollowData = useCallback(async (userId: string) => {
     try {
@@ -58,19 +48,17 @@ export function FollowProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-
   const follow = async (userId: string) => {
     try {
       setIsLoading(true);
       await followUser(userId);
     } catch (error) {
       console.error("Follow failed:", error);
-      throw error; 
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
-
 
   const unfollow = async (userId: string) => {
     try {
@@ -78,7 +66,7 @@ export function FollowProvider({ children }: { children: ReactNode }) {
       await unfollowUser(userId);
     } catch (error) {
       console.error("Unfollow failed:", error);
-      throw error; 
+      throw error;
     } finally {
       setIsLoading(false);
     }

@@ -15,6 +15,7 @@ import {
   getConversationById as fetchConversationById,
 } from "../api/services/chat.service";
 import type { INotification } from "../types/Notification";
+import { API_BASE_URL } from "../api/endpoints";
 
 export type { IChatUser, IConversation, IMessage };
 
@@ -37,12 +38,14 @@ interface ChatProviderProps {
   children: ReactNode;
 }
 
+const SOCKET_URL = API_BASE_URL.replace(/\/api\/?$/, "");
+
 export const ChatProvider = ({ children }: ChatProviderProps) => {
   const socketRef = useRef<Socket | null>(null);
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const socket = io("http://localhost:8000", {
+    const socket = io(SOCKET_URL, {
       withCredentials: true,
     });
 
@@ -91,7 +94,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   const onReceiveMessage = useCallback((callback: (message: IMessage) => void) => {
     if (!socketRef.current) {
       console.warn("Socket is not connected");
-      return () => { };
+      return () => {};
     }
 
     socketRef.current.on("receive-message", callback);
@@ -104,7 +107,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   const onNotification = useCallback((callback: (notification: INotification) => void) => {
     if (!socketRef.current) {
       console.warn("Socket is not connected");
-      return () => { };
+      return () => {};
     }
 
     socketRef.current.on("new-notification", callback);
@@ -126,6 +129,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     },
     []
   );
+
   const getOrCreateConversation = useCallback(
     async (recipientId: string): Promise<IConversation> => {
       const res = await startConversation(recipientId);

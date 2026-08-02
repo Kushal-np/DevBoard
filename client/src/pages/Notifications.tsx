@@ -50,30 +50,23 @@ const notificationHref = (n: INotification) => {
 
 const getInitials = (name?: string) => {
   if (!name) return "?";
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 };
 
+// Notifications arrive live via the socket connection in ChatContext →
+// NotificationContext (see "new-notification" listener there), so this
+// page always reflects real-time state — no polling or refresh needed.
 const Notifications = () => {
-  const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead } =
-    useNotification();
+  const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead } = useNotification();
 
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-2xl px-4 py-6">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="font-display text-2xl font-semibold text-text">
-              Notifications
-            </h1>
+            <h1 className="font-display text-2xl font-semibold text-text">Notifications</h1>
             {unreadCount > 0 && (
-              <p className="mt-1 text-sm text-text-secondary">
-                {unreadCount} unread
-              </p>
+              <p className="mt-1 text-sm text-text-secondary">{unreadCount} unread</p>
             )}
           </div>
 
@@ -97,9 +90,7 @@ const Notifications = () => {
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-surface py-20 text-center">
             <Bell className="mb-3 h-8 w-8 text-text-secondary/40" />
-            <p className="text-sm text-text-secondary">
-              You don't have any notifications yet.
-            </p>
+            <p className="text-sm text-text-secondary">You don't have any notifications yet.</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -114,9 +105,7 @@ const Notifications = () => {
                     if (!n.read) markAsRead(n._id);
                   }}
                   className={`flex items-start gap-3 rounded-2xl border p-4 transition hover:border-primary/40 ${
-                    n.read
-                      ? "border-border bg-surface"
-                      : "border-primary/30 bg-primary/5"
+                    n.read ? "border-border bg-surface" : "border-primary/30 bg-primary/5"
                   }`}
                 >
                   {n.senderId?.profile_url ? (
@@ -133,25 +122,16 @@ const Notifications = () => {
 
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-text">
-                      <span className="font-semibold">{n.senderId?.name}</span>{" "}
-                      {n.text}
+                      <span className="font-semibold">{n.senderId?.name}</span> {n.text}
                     </p>
-                    <p className="mt-1 text-xs text-text-secondary">
-                      {timeAgo(n.createdAt)}
-                    </p>
+                    <p className="mt-1 text-xs text-text-secondary">{timeAgo(n.createdAt)}</p>
                   </div>
 
-                  <div
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${iconColorFor(
-                      n.type
-                    )}`}
-                  >
+                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${iconColorFor(n.type)}`}>
                     <Icon size={15} />
                   </div>
 
-                  {!n.read && (
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
-                  )}
+                  {!n.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />}
                 </Link>
               );
             })}

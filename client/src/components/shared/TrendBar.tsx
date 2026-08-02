@@ -86,7 +86,6 @@ const TrendBar = () => {
 
   return (
     <aside className="hidden lg:block lg:w-[340px] lg:shrink-0 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:py-6 lg:px-3 space-y-4">
-      {/* Welcome Card */}
       <div className="rounded-2xl bg-surface/40 backdrop-blur-sm border border-border/30 p-4">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-primary/10 p-2">
@@ -101,7 +100,6 @@ const TrendBar = () => {
         </div>
       </div>
 
-      {/* Who to Follow */}
       <div className="rounded-2xl border border-border/30 bg-surface/40 backdrop-blur-sm p-4 transition-colors hover:border-border/50">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-text flex items-center gap-2">
@@ -152,7 +150,6 @@ const TrendBar = () => {
         )}
       </div>
 
-      {/* Popular Now */}
       <div className="rounded-2xl border border-border/30 bg-surface/40 backdrop-blur-sm p-4 transition-colors hover:border-border/50">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-text flex items-center gap-2">
@@ -206,7 +203,6 @@ const TrendBar = () => {
         )}
       </div>
 
-      {/* Get Certified */}
       <div className="rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent p-4 transition-colors hover:border-primary/20">
         <div className="flex items-start gap-3">
           <div className="rounded-xl bg-primary/10 p-2 shrink-0">
@@ -222,7 +218,6 @@ const TrendBar = () => {
         </div>
       </div>
 
-      {/* Footer */}
       <div className="px-2 py-3 border-t border-border/10">
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-text-secondary/30">
           <a href="#" className="transition-colors hover:text-text-secondary/60">Terms</a>
@@ -232,7 +227,7 @@ const TrendBar = () => {
           <a href="#" className="transition-colors hover:text-text-secondary/60">Ads Info</a>
           <a href="#" className="transition-colors hover:text-text-secondary/60">More</a>
         </div>
-        <p className="text-[10px] text-text-secondary/20 mt-2">© 2026 BuildHub. All rights reserved.</p>
+        <p className="text-[10px] text-text-secondary/20 mt-2">© 2026 DevBoard. All rights reserved.</p>
       </div>
     </aside>
   );

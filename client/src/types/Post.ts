@@ -6,6 +6,11 @@ export interface IPostUser {
   profile_url?: string;
 }
 
+export interface ITag {
+  name: string;
+  category: string;
+}
+
 export interface IPost {
   _id: string;
   title: string;
@@ -13,12 +18,15 @@ export interface IPost {
   liveUrl?: string;
   repoUrl?: string;
   techStack: string[];
-  tags: string[];
+  tags: ITag[];
   thumbnailUrl?: string;
+  stars: string[];
   starCount: number;
   viewCount: number;
   featured: boolean;
-  status: "draft" | "published";
+  status: "draft" | "published" | "archived";
   createdAt: string;
-  userId: IPostUser;   // populated object, not a string
+  updatedAt: string;
+  userId: IPostUser; 
+  isLiked?: boolean;
 }
