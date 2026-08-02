@@ -9,10 +9,46 @@ import { IUserResponse } from "../interfaces/Response";
 import { IAuthResponse } from "../interfaces/Response/AuthResponse";
 import { createNotification } from "../services/notification.services";
 
+function isPasswordStrong(password: string): { valid: boolean; message: string } {
+  if (typeof password !== "string") {
+    return { valid: false, message: "Password is required." };
+  }
+  if (password.length < 8) {
+    return { valid: false, message: "Password must be at least 8 characters long." };
+  }
+  if (password.length > 128) {
+    return { valid: false, message: "Password must be less than 128 characters long." };
+  }
+  if (!/[a-z]/.test(password)) {
+    return { valid: false, message: "Password must contain at least one lowercase letter." };
+  }
+  if (!/[A-Z]/.test(password)) {
+    return { valid: false, message: "Password must contain at least one uppercase letter." };
+  }
+  if (!/[0-9]/.test(password)) {
+    return { valid: false, message: "Password must contain at least one number." };
+  }
+  if (!/[^a-zA-Z0-9]/.test(password)) {
+    return { valid: false, message: "Password must contain at least one special character." };
+  }
+ 
+  const commonPasswords = [
+    "password", "12345678", "qwerty123", "letmein", "iloveyou",
+    "admin123", "welcome1", "password1", "123456789", "abc12345",
+  ];
+  if (commonPasswords.includes(password.toLowerCase())) {
+    return { valid: false, message: "This password is too common. Please choose a stronger one." };
+  }
+ 
+  return { valid: true, message: "Password is strong." };
+}
+
+
+
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log("Hitted")
     const { name, email, username, passwordHash } = req.body;
-
     if (!name || !email || !username || !passwordHash) {
       res.status(400).json({
         success: false,
@@ -20,9 +56,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
-
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-
     if (existingUser) {
       res.status(409).json({
         success: false,
@@ -33,21 +67,27 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
-
+ 
+    const passwordCheck = isPasswordStrong(passwordHash);
+    if (!passwordCheck.valid) {
+      res.status(400).json({
+        success: false,
+        message: passwordCheck.message,
+      });
+      return;
+    }
+ 
     const hashedPassword = await bcrypt.hash(passwordHash, 10);
-
     const user = await User.create({
       name,
       email,
       username,
       passwordHash: hashedPassword,
     });
-
     const userResponse: IUserResponse = {
       username: user.username,
       email: user.email,
       name: user.name,
-      passwordHash: user.passwordHash,
       followerCount: user.followerCount,
       followingCount: user.followingCount,
       followers: user.followers,
@@ -56,22 +96,18 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       profile_url: user.profile_url,
       cover_url: user.cover_url,
     };
-
     const token = generateToken({ userId: user._id.toString() });
-
     res.cookie("token", token, {
       httpOnly: true,
       secure: false,
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
     const response: IAuthResponse = {
       success: true,
       message: "User registered successfully!",
       user: userResponse,
     };
-
     res.status(201).json(response);
   } catch (error) {
     console.error(error);
@@ -112,7 +148,6 @@ export const login = async (req: Request, res: Response) => {
       username: user.username,
       email: user.email,
       name: user.name,
-      passwordHash: user.passwordHash,
       followerCount: user.followerCount,
       followingCount: user.followingCount,
       followers: user.followers,

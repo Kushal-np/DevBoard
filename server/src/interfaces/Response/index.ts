@@ -11,7 +11,6 @@ export interface IUserResponse{
     username:string ; 
     email: string ; 
     name : string ; 
-    passwordHash : string ; 
     followerCount : number; 
     followingCount : number ; 
     followers: Types.ObjectId[] ; 
