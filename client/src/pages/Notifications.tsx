@@ -115,7 +115,7 @@ const Notifications = () => {
                       className="h-11 w-11 shrink-0 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-on-primary">
                       {getInitials(n.senderId?.name)}
                     </div>
                   )}

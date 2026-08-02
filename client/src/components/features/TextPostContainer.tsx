@@ -76,13 +76,13 @@ const TextPostContainer = () => {
                         className="h-11 w-11 rounded-full object-cover ring-1 ring-border"
                       />
                     ) : (
-                      <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                      <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold">
                         {getInitials(author?.name)}
                       </div>
                     )}
                   </Link>
                 ) : (
-                  <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                  <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold">
                     {getInitials(author?.name)}
                   </div>
                 )}

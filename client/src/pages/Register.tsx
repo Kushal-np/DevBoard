@@ -103,7 +103,7 @@ const Register = () => {
           <button
             type="submit"
             disabled={isRegistering}
-            className="w-full rounded-xl bg-primary py-3 font-semibold text-background transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-xl bg-primary py-3 font-semibold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isRegistering ? "Creating Account..." : "Create Account"}
           </button>

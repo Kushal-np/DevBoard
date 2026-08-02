@@ -173,7 +173,7 @@ const CommentModal = ({ postId, onClose, onCommentCountChange }: CommentModalPro
                     className="h-9 w-9 shrink-0 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary">
                     {getInitials(comment.userId?.name)}
                   </div>
                 )}
@@ -215,7 +215,7 @@ const CommentModal = ({ postId, onClose, onCommentCountChange }: CommentModalPro
           <button
             onClick={handleSubmit}
             disabled={!text.trim() || isSubmitting}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-white transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-primary-hover"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-primary-hover"
           >
             <Send size={16} />
           </button>

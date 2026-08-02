@@ -204,13 +204,13 @@ const Likes = () => {
                         {author?.profile_url ? (
                           <img src={author.profile_url} className="h-9 w-9 rounded-full object-cover" />
                         ) : (
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary">
                             {getInitials(author?.name)}
                           </div>
                         )}
                       </Link>
                     ) : (
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary">
                         {getInitials(author?.name)}
                       </div>
                     )}

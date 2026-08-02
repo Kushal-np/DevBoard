@@ -124,7 +124,7 @@ const ChatList = () => {
                     className="h-12 w-12 rounded-full object-cover ring-2 ring-transparent transition hover:ring-primary/40"
                   />
                 ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-bold text-white ring-2 ring-transparent transition hover:ring-primary/40">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-bold text-on-primary ring-2 ring-transparent transition hover:ring-primary/40">
                     {getInitials(f.name)}
                   </div>
                 )}
@@ -175,7 +175,7 @@ const ChatList = () => {
                       className="h-12 w-12 shrink-0 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-on-primary">
                       {getInitials(other?.name)}
                     </div>
                   )}

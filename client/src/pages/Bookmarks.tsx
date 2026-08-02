@@ -80,13 +80,13 @@ const Bookmarks = () => {
                               className="h-11 w-11 rounded-full object-cover ring-1 ring-border"
                             />
                           ) : (
-                            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary font-bold text-white">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary font-bold text-on-primary">
                               {getInitials(author?.name)}
                             </div>
                           )}
                         </Link>
                       ) : (
-                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary font-bold text-white">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary font-bold text-on-primary">
                           {getInitials(author?.name)}
                         </div>
                       )}

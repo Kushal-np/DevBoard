@@ -60,7 +60,7 @@ const Search = () => {
         />
         <button
           onClick={runSearch}
-          className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-background transition hover:bg-primary-hover"
+          className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-on-primary transition hover:bg-primary-hover"
         >
           Search
         </button>
@@ -118,7 +118,7 @@ const Search = () => {
                 {r.profile_url ? (
                   <img src={r.profile_url} className="h-11 w-11 rounded-full object-cover" />
                 ) : (
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-bold text-on-primary">
                     {getInitials(r.name)}
                   </div>
                 )}

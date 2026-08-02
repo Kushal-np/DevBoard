@@ -1,7 +1,6 @@
-// src/components/layout/TrendBar.tsx
 
 import { useEffect, useState } from "react";
-import { Users, ArrowUpRight, Flame, Clock, Award, Sparkles, Heart } from "lucide-react";
+import { Users, ArrowUpRight, Flame, Clock  , Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useFollow } from "../../hooks/useFollow";
@@ -88,9 +87,7 @@ const TrendBar = () => {
     <aside className="hidden lg:block lg:w-[340px] lg:shrink-0 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:py-6 lg:px-3 space-y-4">
       <div className="rounded-2xl bg-surface/40 backdrop-blur-sm border border-border/30 p-4">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-primary/10 p-2">
-            <Sparkles size={18} className="text-primary" />
-          </div>
+
           <div>
             <p className="text-sm font-medium text-text">
               Welcome back, {user?.username || "Developer"}!
@@ -140,7 +137,7 @@ const TrendBar = () => {
                 <button
                   onClick={() => handleFollow(u._id)}
                   disabled={followingIds.has(u._id)}
-                  className="rounded-full border border-primary/20 px-3 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-background hover:border-primary disabled:opacity-50"
+                  className="rounded-full border border-primary/20 px-3 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-on-primary hover:border-primary disabled:opacity-50"
                 >
                   Follow
                 </button>
@@ -203,20 +200,7 @@ const TrendBar = () => {
         )}
       </div>
 
-      <div className="rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent p-4 transition-colors hover:border-primary/20">
-        <div className="flex items-start gap-3">
-          <div className="rounded-xl bg-primary/10 p-2 shrink-0">
-            <Award size={18} className="text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-semibold text-text">Earn a Job-Ready Certificate</h4>
-            <p className="text-xs text-text-secondary/60 mt-0.5">Explore diverse skills, and education.</p>
-            <button className="mt-2 rounded-full bg-primary px-4 py-1 text-xs font-medium text-background transition-colors hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25">
-              Learn More
-            </button>
-          </div>
-        </div>
-      </div>
+
 
       <div className="px-2 py-3 border-t border-border/10">
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-text-secondary/30">

@@ -652,7 +652,7 @@ const PostContent = () => {
           <button
             type="submit"
             disabled={!canSubmit || isLoading}
-            className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isLoading && <Loader2 size={15} className="animate-spin" />}
             {isLoading ? "Posting…" : "Post"}

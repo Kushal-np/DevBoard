@@ -109,7 +109,7 @@ const Chat = () => {
                 className="h-10 w-10 rounded-full object-cover"
               />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-on-primary">
                 {getInitials(otherParticipant.name)}
               </div>
             )}
@@ -136,7 +136,7 @@ const Chat = () => {
               <div key={msg._id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
-                    isMine ? "bg-primary text-white" : "bg-surface border border-border text-text"
+                    isMine ? "bg-primary text-on-primary" : "bg-surface border border-border text-text"
                   }`}
                 >
                   {msg.text}
@@ -160,7 +160,7 @@ const Chat = () => {
         <button
           onClick={handleSend}
           disabled={!text.trim()}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white transition disabled:opacity-50 hover:bg-primary-hover"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-on-primary transition disabled:opacity-50 hover:bg-primary-hover"
         >
           <Send size={16} />
         </button>

@@ -147,13 +147,13 @@ const Settings = () => {
                 className="h-20 w-20 rounded-2xl border-4 border-surface object-cover shadow-lg"
               />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl border-4 border-surface bg-primary text-2xl font-bold text-white shadow-lg">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl border-4 border-surface bg-primary text-2xl font-bold text-on-primary shadow-lg">
                 <User size={28} />
               </div>
             )}
             <button
               onClick={() => profileInputRef.current?.click()}
-              className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-white shadow-md transition hover:bg-primary-hover"
+              className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-on-primary shadow-md transition hover:bg-primary-hover"
               aria-label="Change profile picture"
             >
               <Camera size={13} />
@@ -208,7 +208,7 @@ const Settings = () => {
           <button
             onClick={saveProfile}
             disabled={isSaving}
-            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-background transition hover:bg-primary-hover disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
           >
             {isSaving && <Loader2 size={14} className="animate-spin" />}
             Save changes
@@ -240,7 +240,7 @@ const Settings = () => {
         <button
           onClick={savePassword}
           disabled={!currentPassword || newPassword.length < 6 || isSaving}
-          className="mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-background transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           Update Password
         </button>

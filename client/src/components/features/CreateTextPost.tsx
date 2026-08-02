@@ -84,7 +84,7 @@ const CreateTextPost = () => {
         {user?.profile_url ? (
           <img src={user.profile_url} className="h-10 w-10 shrink-0 rounded-full object-cover" />
         ) : (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-on-primary">
             {getInitials(user?.name)}
           </div>
         )}
@@ -119,7 +119,7 @@ const CreateTextPost = () => {
                 {user?.profile_url ? (
                   <img src={user.profile_url} className="h-10 w-10 shrink-0 rounded-full object-cover" />
                 ) : (
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-on-primary">
                     {getInitials(user?.name)}
                   </div>
                 )}
@@ -171,14 +171,14 @@ const CreateTextPost = () => {
                 className="hidden"
               />
 
-              <button
-                onClick={handleSubmit}
-                disabled={!text.trim() || isSubmitting}
-                className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-background transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Send size={14} />
-                {isSubmitting ? "Posting..." : "Post"}
-              </button>
+<button
+  onClick={handleSubmit}
+  disabled={!text.trim() || isSubmitting}
+  className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-on-primary transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+>
+  <Send size={14} />
+  {isSubmitting ? "Posting..." : "Post"}
+</button>
             </div>
           </div>
         </div>

@@ -100,7 +100,7 @@ const NotificationBell = () => {
                     {n.senderId?.profile_url ? (
                       <img src={n.senderId.profile_url} className="h-9 w-9 shrink-0 rounded-full object-cover" />
                     ) : (
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary">
                         {n.senderId?.name?.[0]?.toUpperCase() ?? "?"}
                       </div>
                     )}

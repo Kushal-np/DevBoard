@@ -39,7 +39,7 @@ const FeaturedTab = () => {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <Award className="mb-3 h-8 w-8 text-text-secondary/40" />
-        <p className="text-sm text-text-secondary">No featured projects yet.</p>
+        <p className="text-sm text-text-secondary">Feature coming soon...</p>
       </div>
     );
   }
@@ -86,7 +86,7 @@ const FeaturedTab = () => {
                     {author?.profile_url ? (
                       <img src={author.profile_url} className="h-4 w-4 rounded-full object-cover" />
                     ) : (
-                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-white">
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-on-primary">
                         {getInitials(author?.name)}
                       </span>
                     )}
