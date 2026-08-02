@@ -1,76 +1,89 @@
-import { useState } from "react";
-import { Moon, Sun, Code2, LayoutDashboard, Menu, X } from "lucide-react";
+// src/components/layout/Navbar.tsx
+
+import { useEffect, useState } from "react";
+import { Moon, Sun, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../../theme/useTheme";
 import { useAuth } from "../../hooks/useAuth";
 import NotificationBell from "../Notification/NotificationBell";
+import Button from "../ui/Button";
 
 interface NavItem {
   name: string;
   path: string;
 }
 
+const navLinks: NavItem[] = [
+  { name: "Home", path: "/" },
+  { name: "Explore", path: "/explore" },
+  { name: "Projects", path: "/projects" },
+  { name: "Community", path: "/community" },
+];
+
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const { isAuthenticated, user } = useAuth();
-  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const navLinks: NavItem[] = [
-    { name: "Home", path: "/" },
-    { name: "Explore", path: "/explore" },
-    { name: "Projects", path: "/projects" },
-    { name: "Community", path: "/community" },
-  ];
+  // Elevation fades in on scroll rather than snapping — a 1px hairline
+  // border plus a very soft shadow, never a hard drop shadow.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 text-text transition hover:text-primary">
-          <Code2 className="h-7 w-7" />
-          <span className="text-xl font-bold tracking-tight">DevBoard</span>
+    <nav
+      className={`sticky top-0 z-50 bg-background/80 backdrop-blur-md transition-shadow duration
+        ${scrolled ? "border-b border-border shadow-sm" : "border-b border-transparent"}`}
+    >
+      <div className="mx-auto flex h-16 max-w-container items-center justify-between px-4 md:px-6">
+        {/* Wordmark — display serif at small size reads as a considered
+            choice rather than a generic sans logotype. */}
+        <Link to="/" className="flex items-center gap-2 text-text transition-colors hover:text-primary">
+          <span className="font-display text-xl tracking-tight">DevBoard</span>
         </Link>
 
-        {/* Desktop Navigation */}
         <div className="hidden items-center gap-8 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               to={link.path}
-              className="text-text-secondary transition hover:text-text"
+              className="text-sm text-text-secondary transition-colors duration-micro hover:text-text"
             >
               {link.name}
             </Link>
           ))}
         </div>
 
-        {/* Right Side */}
         <div className="flex items-center gap-2 md:gap-3">
           {isAuthenticated && <NotificationBell />}
 
-          {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-background text-text transition hover:bg-surface-hover"
+            aria-label="Toggle theme"
+            className="flex h-10 w-10 items-center justify-center rounded border border-border
+              text-text-secondary transition-colors duration-micro hover:border-border-strong hover:text-text"
           >
-            {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+            {theme === "light" ? <Moon size={17} strokeWidth={1.75} /> : <Sun size={17} strokeWidth={1.75} />}
           </button>
 
-          {/* Desktop-only auth buttons */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden items-center gap-3 md:flex">
             {isAuthenticated ? (
               <>
                 <Link
                   to="/dashboard"
-                  className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-text transition hover:bg-surface-hover"
+                  className="rounded border border-border px-4 py-2 text-sm text-text transition-colors duration-micro hover:bg-surface"
                 >
-                  <LayoutDashboard size={18} />
                   Dashboard
                 </Link>
-
                 <Link
                   to={`/profile/${user?.username}`}
-                  className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-border bg-primary text-background font-semibold transition hover:scale-105"
+                  className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full
+                    border border-border font-mono text-sm font-medium text-text transition-transform duration-micro hover:scale-105"
                 >
                   {user?.profile_url ? (
                     <img src={user.profile_url} alt="" className="h-full w-full object-cover" />
@@ -81,94 +94,70 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <Link
-                  to="/login"
-                  className="rounded-xl border border-border bg-background px-4 py-2 text-text transition hover:bg-surface-hover"
-                >
+                <Link to="/login" className="text-sm text-text-secondary hover:text-text">
                   Login
                 </Link>
-
-                <Link
-                  to="/register"
-                  className="rounded-xl bg-primary px-4 py-2 font-medium text-background transition hover:bg-primary-hover"
-                >
-                  Register
+                <Link to="/register">
+                  <Button size="sm">Register</Button>
                 </Link>
               </>
             )}
           </div>
 
-          {/* Mobile hamburger toggle */}
           <button
-            onClick={() => setMobileOpen((prev) => !prev)}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-background text-text transition hover:bg-surface-hover md:hidden"
+            onClick={() => setMobileOpen((p) => !p)}
+            aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
+            className="flex h-10 w-10 items-center justify-center rounded border border-border text-text md:hidden"
           >
             {mobileOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile dropdown menu */}
-      {mobileOpen && (
-        <div className="md:hidden border-t border-border bg-surface px-4 py-4 flex flex-col gap-4">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              to={link.path}
-              onClick={() => setMobileOpen(false)}
-              className="text-text-secondary transition hover:text-text"
-            >
-              {link.name}
-            </Link>
-          ))}
-
-          <div className="pt-2 border-t border-border flex flex-col gap-3">
-            {isAuthenticated ? (
-              <>
-                <Link
-                  to="/dashboard"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-text"
-                >
-                  <LayoutDashboard size={18} />
-                  Dashboard
-                </Link>
+      {/* Mobile menu — height-animated, not display:none toggled, so the
+          reveal reads as a transition rather than a jump. */}
+      <div
+        className={`grid overflow-hidden border-t border-border bg-background transition-[grid-template-rows] duration ease-[var(--ease)] md:hidden
+          ${mobileOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr] border-t-0"}`}
+      >
+        <div className="overflow-hidden">
+          <div className="flex flex-col gap-4 px-4 py-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                onClick={() => setMobileOpen(false)}
+                className="text-sm text-text-secondary hover:text-text"
+              >
+                {link.name}
+              </Link>
+            ))}
+            <div className="flex flex-col gap-3 border-t border-border pt-4">
+              {isAuthenticated ? (
                 <Link
                   to={`/profile/${user?.username}`}
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-text"
+                  className="text-sm text-text"
                 >
-                  {user?.profile_url ? (
-                    <img src={user.profile_url} alt="" className="h-6 w-6 rounded-full object-cover" />
-                  ) : (
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">
-                      {user?.name?.[0]?.toUpperCase() ?? "?"}
-                    </div>
-                  )}
                   Profile
                 </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="rounded-xl border border-border bg-background px-4 py-2 text-center text-text"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  onClick={() => setMobileOpen(false)}
-                  className="rounded-xl bg-primary px-4 py-2 text-center font-medium text-background"
-                >
-                  Register
-                </Link>
-              </>
-            )}
+              ) : (
+                <>
+                  <Link to="/login" onClick={() => setMobileOpen(false)} className="text-sm text-text">
+                    Login
+                  </Link>
+                  <Link to="/register" onClick={() => setMobileOpen(false)}>
+                    <Button size="sm" className="w-full">
+                      Register
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };

@@ -1,4 +1,3 @@
-// src/components/features/CreateTextPost.tsx
 
 import { useRef, useState } from "react";
 import { Image as ImageIcon, X, Send, Pencil } from "lucide-react";

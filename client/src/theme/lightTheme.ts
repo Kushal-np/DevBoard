@@ -1,4 +1,3 @@
-// lightTheme.ts
 import type { Theme } from "./theme";
 
 export const lightTheme: Theme = {

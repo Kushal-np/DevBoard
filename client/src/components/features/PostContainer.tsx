@@ -1,4 +1,3 @@
-// src/components/features/PostContainer.tsx
 
 import { useEffect, useState, useRef } from "react";
 import { useFeed } from "../../hooks/useFeed";
@@ -19,38 +18,7 @@ import { Link } from "react-router-dom";
 import { useBookmark } from "../../hooks/useBookmark";
 import { useAuth } from "../../hooks/useAuth";
 import CommentModal from "../Comment/Comment";
-
-export interface IPost {
-  _id: string;
-  userId: {
-    _id: string;
-    name: string;
-    username: string;
-    profile_url?: string;
-  };
-  title: string;
-  description: string;
-  liveUrl?: string;
-  repoUrl?: string;
-  techStack: string[];
-  tags: {
-    name: string;
-    category: string;
-  }[];
-  thumbnailUrl?: string;
-  stars: string[];
-  starCount: number;
-  viewCount: number;
-  status: "draft" | "published" | "archived";
-  featured: boolean;
-  createdAt: string | Date;
-  updatedAt: string | Date;
-}
-
-interface LikeState {
-  liked: boolean;
-  count: number;
-}
+import Badge from "../ui/Badge";
 
 const PostContainer = () => {
   const { posts, getPosts, isLoading, Likepost, DeletePost } = useFeed();
@@ -59,14 +27,11 @@ const PostContainer = () => {
 
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [visiblePosts, setVisiblePosts] = useState(5);
-
   const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
-
-  const [likeState, setLikeState] = useState<Record<string, LikeState>>({});
+  const [likeState, setLikeState] = useState<Record<string, { liked: boolean; count: number }>>({});
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [bouncingBookmarkId, setBouncingBookmarkId] = useState<string | null>(null);
 
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastPostRef = useRef<HTMLDivElement | null>(null);
@@ -79,9 +44,7 @@ const PostContainer = () => {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpenMenuId(null);
-      }
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpenMenuId(null);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -89,91 +52,48 @@ const PostContainer = () => {
 
   useEffect(() => {
     if (observerRef.current) observerRef.current.disconnect();
-
     observerRef.current = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && visiblePosts < (posts?.length || 0)) {
         setVisiblePosts((prev) => Math.min(prev + 3, posts.length));
       }
     });
-
     if (lastPostRef.current) observerRef.current.observe(lastPostRef.current);
-
     return () => observerRef.current?.disconnect();
   }, [posts, visiblePosts]);
 
   useEffect(() => {
     if (!Array.isArray(posts)) return;
-
     setLikeState((prev) => {
       const next = { ...prev };
-
       posts.forEach((post: any) => {
         const id = post?._id;
         if (!id || next[id]) return;
-
         const liked =
-          !!user?._id &&
-          Array.isArray(post.stars) &&
-          post.stars.some((s: string) => String(s) === String(user._id));
-
-        next[id] = {
-          liked,
-          count: post.starCount ?? post.stars?.length ?? 0,
-        };
+          !!user?._id && Array.isArray(post.stars) && post.stars.some((s: string) => String(s) === String(user._id));
+        next[id] = { liked, count: post.starCount ?? post.stars?.length ?? 0 };
       });
-
       return next;
     });
   }, [posts, user?._id]);
 
-  const getPostId = (post: any) => {
-    return post?._id || crypto.randomUUID();
-  };
-
-  const getThumbnailUrl = (post: any) => {
-    return post?.thumbnailUrl || post?.thumbnail || null;
-  };
-
-  const handleImageError = (id: string) => {
-    setImageErrors((prev) => ({
-      ...prev,
-      [id]: true,
-    }));
-  };
-
   const getInitials = (name: string) => {
     if (!name) return "?";
-
-    return name
-      .split(" ")
-      .map((n: string) => n[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase();
+    return name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
   };
 
   const formatDate = (date: string) => {
     const d = new Date(date);
     const diff = Math.floor((Date.now() - d.getTime()) / 1000);
-
     if (diff < 60) return `${diff}s`;
     if (diff < 3600) return `${Math.floor(diff / 60)}m`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-
     return d.toLocaleDateString();
   };
 
   const handleLikeClick = async (postId: string) => {
-    if (!postId) return;
-
     const current = likeState[postId] ?? { liked: false, count: 0 };
-    const optimistic: LikeState = {
-      liked: !current.liked,
-      count: current.liked ? current.count - 1 : current.count + 1,
-    };
-
+    const optimistic = { liked: !current.liked, count: current.liked ? current.count - 1 : current.count + 1 };
     setLikeState((prev) => ({ ...prev, [postId]: optimistic }));
-
     try {
       await Likepost(postId);
     } catch {
@@ -198,27 +118,19 @@ const PostContainer = () => {
     try {
       await DeletePost(postId);
     } catch {
-      // error already surfaced via console in context
+      /* surfaced via context */
     }
   };
 
   const isBookmarked = (postId: string) => bookmarks.some((b: any) => b?._id === postId);
-
-  const handleBookmarkClick = (postId: string) => {
-    setBouncingBookmarkId(postId);
-    setTimeout(() => setBouncingBookmarkId((id) => (id === postId ? null : id)), 320);
-    toggleBookmark(postId);
-  };
-
   const safePosts = Array.isArray(posts) ? posts.filter((post: any) => post?.title) : [];
-
   const displayedPosts = safePosts.slice(0, visiblePosts);
 
   if (isLoading) {
     return (
       <div className="space-y-4 p-4">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-64 rounded-2xl bg-surface animate-pulse" />
+          <div key={i} className="h-64 animate-pulse rounded-md bg-surface" />
         ))}
       </div>
     );
@@ -226,31 +138,28 @@ const PostContainer = () => {
 
   if (safePosts.length === 0) {
     return (
-      <div className="flex min-h-[420px] items-center justify-center text-text-secondary">
-        No posts found
+      <div className="flex min-h-[420px] flex-col items-center justify-center gap-2 px-6 text-center">
+        <p className="font-display text-lg text-text">No projects yet</p>
+        <p className="text-sm text-text-secondary">Be the first to publish something here.</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full flex flex-col gap-4 p-4">
+    <div className="flex w-full flex-col gap-4 p-4">
       {displayedPosts.map((post: any, index: number) => {
-        const postId = getPostId(post);
-        const thumbnail = getThumbnailUrl(post);
+        const postId = post._id;
+        const thumbnail = post?.thumbnailUrl || post?.thumbnail || null;
         const author = post.userId;
         const profileHref = author?.username ? `/profile/${author.username}` : null;
         const isMine = !!user?._id && author?._id === user._id;
-
-        const state = likeState[postId] ?? {
-          liked: false,
-          count: post.starCount ?? 0,
-        };
+        const state = likeState[postId] ?? { liked: false, count: post.starCount ?? 0 };
 
         return (
           <article
             key={postId}
             ref={index === displayedPosts.length - 1 ? lastPostRef : null}
-            className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition"
+            className="overflow-hidden rounded-md border border-border bg-surface transition-colors duration-micro hover:border-border-strong"
           >
             {/* HEADER */}
             <div className="flex items-center justify-between px-5 py-4">
@@ -258,39 +167,31 @@ const PostContainer = () => {
                 {profileHref ? (
                   <Link to={profileHref}>
                     {author?.profile_url ? (
-                      <img
-                        src={author.profile_url}
-                        className="h-11 w-11 rounded-full object-cover ring-1 ring-border"
-                      />
+                      <img src={author.profile_url} className="h-10 w-10 rounded-full object-cover ring-1 ring-border" />
                     ) : (
-                      <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-wash font-mono text-sm font-medium text-primary">
                         {getInitials(author?.name)}
                       </div>
                     )}
                   </Link>
                 ) : (
-                  <div className="h-11 w-11 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-wash font-mono text-sm font-medium text-primary">
                     {getInitials(author?.name)}
                   </div>
                 )}
 
                 <div>
                   {profileHref ? (
-                    <Link to={profileHref} className="text-text font-semibold hover:text-primary transition">
+                    <Link to={profileHref} className="text-sm font-semibold text-text transition-colors hover:text-primary">
                       {author?.name || "anonymous"}
                     </Link>
                   ) : (
-                    <span className="text-text font-semibold">{author?.name || "anonymous"}</span>
+                    <span className="text-sm font-semibold text-text">{author?.name || "anonymous"}</span>
                   )}
-
-                  <p className="text-sm text-text-secondary flex items-center gap-1">
-                    <Clock size={12} />
+                  <p className="mt-0.5 flex items-center gap-1.5 font-mono text-xs text-text-tertiary">
+                    <Clock size={11} />
                     {formatDate(post.createdAt)}
-                    {post.status === "draft" && (
-                      <span className="ml-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[10px] font-medium text-warning">
-                        Draft
-                      </span>
-                    )}
+                    {post.status === "draft" && <Badge tone="warning">draft</Badge>}
                   </p>
                 </div>
               </div>
@@ -298,42 +199,26 @@ const PostContainer = () => {
               <div className="relative" ref={openMenuId === postId ? menuRef : undefined}>
                 <button
                   onClick={() => setOpenMenuId((id) => (id === postId ? null : postId))}
-                  className="rounded-full p-1.5 text-text-secondary transition hover:bg-background hover:text-text"
                   aria-label="Post options"
+                  className="flex h-8 w-8 items-center justify-center rounded text-text-secondary transition-colors duration-micro hover:bg-surface-2 hover:text-text"
                 >
-                  <MoreHorizontal size={17} />
+                  <MoreHorizontal size={16} />
                 </button>
 
                 {openMenuId === postId && (
-                  <div className="absolute right-0 z-20 mt-1 w-40 overflow-hidden rounded-xl border border-border bg-surface shadow-xl">
+                  <div className="absolute right-0 z-20 mt-1 w-40 overflow-hidden rounded-md border border-border bg-surface shadow-md">
                     {isMine ? (
                       <>
-                        <Link
-                          to={`/post/${postId}`}
-                          onClick={() => setOpenMenuId(null)}
-                          className="flex items-center gap-2 px-3 py-2.5 text-sm text-text transition hover:bg-background"
-                        >
-                          <Pencil size={14} />
-                          View / Edit
+                        <Link to={`/post/${postId}`} onClick={() => setOpenMenuId(null)} className="flex items-center gap-2 px-3 py-2.5 text-sm text-text hover:bg-surface-2">
+                          <Pencil size={14} /> View / Edit
                         </Link>
-                        <button
-                          onClick={() => handleDelete(postId)}
-                          className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-danger transition hover:bg-danger/10"
-                        >
-                          <Trash2 size={14} />
-                          Delete
+                        <button onClick={() => handleDelete(postId)} className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-danger hover:bg-danger/10">
+                          <Trash2 size={14} /> Delete
                         </button>
                       </>
                     ) : (
-                      <button
-                        onClick={() => {
-                          setOpenMenuId(null);
-                          handleShare(postId);
-                        }}
-                        className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-text transition hover:bg-background"
-                      >
-                        <Link2 size={14} />
-                        Copy link
+                      <button onClick={() => { setOpenMenuId(null); handleShare(postId); }} className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-text hover:bg-surface-2">
+                        <Link2 size={14} /> Copy link
                       </button>
                     )}
                   </div>
@@ -342,14 +227,11 @@ const PostContainer = () => {
             </div>
 
             {/* CONTENT */}
-            <div className="px-5 space-y-3">
+            <div className="space-y-2 px-5">
               <Link to={`/post/${postId}`}>
-                <h2 className="font-display text-xl font-semibold text-text hover:text-primary transition">
-                  {post.title}
-                </h2>
+                <h2 className="font-display text-lg text-text transition-colors hover:text-primary">{post.title}</h2>
               </Link>
-
-              <p className="text-text-secondary leading-relaxed">{post.description}</p>
+              <p className="text-sm leading-relaxed text-text-secondary">{post.description}</p>
             </div>
 
             {thumbnail && !imageErrors[postId] && (
@@ -357,84 +239,69 @@ const PostContainer = () => {
                 <img
                   src={thumbnail}
                   alt={post.title}
-                  onError={() => handleImageError(postId)}
-                  className="w-full max-h-[450px] object-cover"
+                  onError={() => setImageErrors((p) => ({ ...p, [postId]: true }))}
+                  className="max-h-[420px] w-full object-cover"
                 />
               </div>
             )}
 
-            {/* TECH STACK */}
-            <div className="px-5 pt-5 flex flex-wrap gap-2">
-              {post.techStack?.map((tech: string) => (
-                <span
-                  key={tech}
-                  className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20"
-                >
-                  {tech}
-                </span>
-              ))}
-            </div>
-
-            {/* TAGS */}
-            {post.tags?.length > 0 && (
-              <div className="px-5 py-4 flex flex-wrap gap-2">
-                {post.tags.map((tag: any) => (
-                  <span key={tag.name} className="text-xs text-text-secondary">
-                    #{tag.name}
-                  </span>
+            {post.techStack?.length > 0 && (
+              <div className="flex flex-wrap gap-2 px-5 pt-5">
+                {post.techStack.map((tech: string) => (
+                  <Badge key={tech} tone="accent">{tech}</Badge>
                 ))}
               </div>
             )}
 
-            {/* STATS */}
-            <div className="px-5 py-3 border-t border-border flex justify-end text-sm text-text-secondary">
-              <span className="flex items-center gap-1">
-                <Eye size={14} />
-                {post.viewCount} views
+            {post.tags?.length > 0 && (
+              <div className="flex flex-wrap gap-x-3 gap-y-1 px-5 pt-3 font-mono text-xs text-text-tertiary">
+                {post.tags.map((tag: any) => (
+                  <span key={tag.name}>#{tag.name}</span>
+                ))}
+              </div>
+            )}
+
+            <div className="flex justify-end px-5 pt-4 font-mono text-xs text-text-tertiary">
+              <span className="flex items-center gap-1.5">
+                <Eye size={13} /> {post.viewCount}
               </span>
             </div>
 
             {/* ACTIONS */}
-            <div className="border-t border-border px-5 py-3 flex justify-around">
+            <div className="mt-3 flex items-center justify-around border-t border-border px-5 py-3">
               <button
                 onClick={() => handleLikeClick(postId)}
-                className={`flex items-center gap-1.5 transition ${
+                className={`flex items-center gap-1.5 text-sm transition-colors duration-micro ${
                   state.liked ? "text-warning" : "text-text-secondary hover:text-warning"
                 }`}
               >
-                <Star size={16} fill={state.liked ? "currentColor" : "none"} />
+                <Star size={16} fill={state.liked ? "currentColor" : "none"} strokeWidth={1.75} />
                 {state.count}
               </button>
 
               <button
                 onClick={() => setActiveCommentPostId(postId)}
-                className="flex items-center gap-1.5 text-text-secondary transition hover:text-primary"
+                className="flex items-center gap-1.5 text-sm text-text-secondary transition-colors duration-micro hover:text-primary"
               >
-                <MessageCircle size={16} />
+                <MessageCircle size={16} strokeWidth={1.75} />
                 {commentCounts[postId] ?? ""}
               </button>
 
               <button
-                onClick={() => handleBookmarkClick(postId)}
-                className={`flex items-center gap-1.5 transition-colors ${
+                onClick={() => toggleBookmark(postId)}
+                className={`flex items-center gap-1.5 text-sm transition-colors duration-micro ${
                   isBookmarked(postId) ? "text-primary" : "text-text-secondary hover:text-primary"
                 }`}
               >
-                <BookmarkIcon
-                  size={16}
-                  fill={isBookmarked(postId) ? "currentColor" : "none"}
-                  className={`transition-transform duration-300 ${
-                    bouncingBookmarkId === postId ? "scale-125" : "scale-100"
-                  }`}
-                />
+                <BookmarkIcon size={16} fill={isBookmarked(postId) ? "currentColor" : "none"} strokeWidth={1.75} />
                 {isBookmarked(postId) ? "Saved" : "Bookmark"}
               </button>
 
               <button
                 onClick={() => handleShare(postId)}
-                className="flex items-center gap-1 text-text-secondary transition hover:text-primary"
+                className="flex items-center gap-1.5 text-sm text-text-secondary transition-colors duration-micro hover:text-primary"
               >
-                {copiedId === postId ? <Check size={16} className="text-success" /> : <Share2 size={16} />}
+                {copiedId === postId ? <Check size={16} className="text-success" /> : <Share2 size={16} strokeWidth={1.75} />}
                 {copiedId === postId ? "Copied" : "Share"}
               </button>
             </div>
@@ -446,9 +313,7 @@ const PostContainer = () => {
         <CommentModal
           postId={activeCommentPostId}
           onClose={() => setActiveCommentPostId(null)}
-          onCommentCountChange={(count) =>
-            setCommentCounts((prev) => ({ ...prev, [activeCommentPostId]: count }))
-          }
+          onCommentCountChange={(count) => setCommentCounts((prev) => ({ ...prev, [activeCommentPostId]: count }))}
         />
       )}
     </div>

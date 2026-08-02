@@ -1,8 +1,3 @@
-// src/components/features/FeaturedTab.tsx
-//
-// Surfaces editorially-featured projects (Project.featured === true) via the
-// previously-unused GET /project/featured endpoint. Rendered as a third tab
-// alongside Projects/Posts on the Feed page.
 
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
