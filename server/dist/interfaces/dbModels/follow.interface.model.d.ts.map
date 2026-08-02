@@ -1,0 +1,1 @@
+{"version":3,"file":"follow.interface.model.d.ts","sourceRoot":"","sources":["../../../src/interfaces/dbModels/follow.interface.model.ts"],"names":[],"mappings":"AAAA,OAAO,EAAC,KAAK,EAAC,MAAM,UAAU,CAAC;AAE/B,MAAM,WAAW,OAAO;IACpB,UAAU,EAAE,KAAK,CAAC,QAAQ,CAAE;IAC5B,WAAW,EAAE,KAAK,CAAC,QAAQ,CAAC;IAC5B,SAAS,EAAE,IAAI,CAAE;IACjB,SAAS,EAAC,IAAI,CAAE;CACnB"}

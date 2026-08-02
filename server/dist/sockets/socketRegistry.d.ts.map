@@ -1,0 +1,1 @@
+{"version":3,"file":"socketRegistry.d.ts","sourceRoot":"","sources":["../../src/sockets/socketRegistry.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,MAAM,IAAI,cAAc,EAAE,MAAM,WAAW,CAAC;AAIrD,eAAO,MAAM,KAAK,GAAI,IAAI,cAAc,SAEvC,CAAC;AAEF,eAAO,MAAM,UAAU,GAAI,QAAQ,MAAM,EAAE,OAAO,MAAM,EAAE,SAAS,OAAO,SAGzE,CAAC"}

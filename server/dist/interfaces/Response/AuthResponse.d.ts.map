@@ -1,0 +1,1 @@
+{"version":3,"file":"AuthResponse.d.ts","sourceRoot":"","sources":["../../../src/interfaces/Response/AuthResponse.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,MAAM,GAAG,CAAC;AAElC,MAAM,WAAW,aAAa;IAC1B,OAAO,EAAC,OAAO,CAAC;IAChB,IAAI,EAAC,aAAa,CAAE;IACpB,OAAO,EAAC,MAAM,CAAC;CAClB"}

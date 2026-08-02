@@ -1,0 +1,1 @@
+{"version":3,"file":"star.interface.model.d.ts","sourceRoot":"","sources":["../../../src/interfaces/dbModels/star.interface.model.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,EAAE,MAAM,UAAU,CAAC;AAEjC,MAAM,WAAW,KAAK;IAClB,MAAM,EAAE,KAAK,CAAC,QAAQ,CAAE;IACxB,SAAS,EAAE,KAAK,CAAC,QAAQ,CAAE;IAC3B,SAAS,EAAC,IAAI,CAAE;IAChB,SAAS,EAAC,IAAI,CAAE;CACnB"}
