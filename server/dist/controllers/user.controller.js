@@ -91,8 +91,8 @@ const register = async (req, res) => {
         const token = (0, generateToken_1.default)({ userId: user._id.toString() });
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false,
-            sameSite: "strict",
+            secure: true,
+            sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         const response = {
@@ -128,8 +128,8 @@ const login = async (req, res) => {
         const token = (0, generateToken_1.default)({ userId: user._id.toString() });
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false,
-            sameSite: "strict",
+            secure: true,
+            sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         const userResponse = {
