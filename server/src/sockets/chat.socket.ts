@@ -9,9 +9,9 @@ import { createNotification } from "../services/notification.services";
 
 export const initChatSocket = (server: HTTPServer) => {
   console.log("Socket initialized");
-  //client origin
+  
   const io = new SocketIOServer(server, {
-    cors: { origin: "https://devboard-platform.vercel.app/", credentials: true },
+    cors: { origin: "https://devboard-platform.vercel.app", credentials: true },
   });
 
   setIO(io);
