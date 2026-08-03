@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import mongoose from "mongoose";
 
 import User from "../models/user.model";
 import generateToken from "../utils/generateToken";
+import { googleClient } from "../utils/googleClient";
 
 import { IUserResponse } from "../interfaces/Response";
 import { IAuthResponse } from "../interfaces/Response/AuthResponse";
@@ -31,7 +33,7 @@ function isPasswordStrong(password: string): { valid: boolean; message: string }
   if (!/[^a-zA-Z0-9]/.test(password)) {
     return { valid: false, message: "Password must contain at least one special character." };
   }
- 
+
   const commonPasswords = [
     "password", "12345678", "qwerty123", "letmein", "iloveyou",
     "admin123", "welcome1", "password1", "123456789", "abc12345",
@@ -39,15 +41,37 @@ function isPasswordStrong(password: string): { valid: boolean; message: string }
   if (commonPasswords.includes(password.toLowerCase())) {
     return { valid: false, message: "This password is too common. Please choose a stronger one." };
   }
- 
+
   return { valid: true, message: "Password is strong." };
 }
 
+function buildUserResponse(user: any): IUserResponse {
+  return {
+    username: user.username,
+    email: user.email,
+    name: user.name,
+    followerCount: user.followerCount,
+    followingCount: user.followingCount,
+    followers: user.followers,
+    following: user.following,
+    bio: user.bio,
+    profile_url: user.profile_url,
+    cover_url: user.cover_url,
+  };
+}
 
+function setAuthCookie(res: Response, token: string) {
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+}
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    console.log("Hitted")
+    console.log("Hitted");
     const { name, email, username, passwordHash } = req.body;
     if (!name || !email || !username || !passwordHash) {
       res.status(400).json({
@@ -67,7 +91,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
- 
+
     const passwordCheck = isPasswordStrong(passwordHash);
     if (!passwordCheck.valid) {
       res.status(400).json({
@@ -76,7 +100,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
- 
+
     const hashedPassword = await bcrypt.hash(passwordHash, 10);
     const user = await User.create({
       name,
@@ -84,29 +108,14 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       username,
       passwordHash: hashedPassword,
     });
-    const userResponse: IUserResponse = {
-      username: user.username,
-      email: user.email,
-      name: user.name,
-      followerCount: user.followerCount,
-      followingCount: user.followingCount,
-      followers: user.followers,
-      following: user.following,
-      bio: user.bio,
-      profile_url: user.profile_url,
-      cover_url: user.cover_url,
-    };
+
     const token = generateToken({ userId: user._id.toString() });
-res.cookie("token", token, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
+    setAuthCookie(res, token);
+
     const response: IAuthResponse = {
       success: true,
       message: "User registered successfully!",
-      user: userResponse,
+      user: buildUserResponse(user),
     };
     res.status(201).json(response);
   } catch (error) {
@@ -137,29 +146,11 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = generateToken({ userId: user._id.toString() });
-res.cookie("token", token, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
-
-    const userResponse: IUserResponse = {
-      username: user.username,
-      email: user.email,
-      name: user.name,
-      followerCount: user.followerCount,
-      followingCount: user.followingCount,
-      followers: user.followers,
-      following: user.following,
-      bio: user.bio,
-      profile_url: user.profile_url,
-      cover_url: user.cover_url,
-    };
+    setAuthCookie(res, token);
 
     const response: IAuthResponse = {
       success: true,
-      user: userResponse,
+      user: buildUserResponse(user),
       message: "User logged in successfully",
     };
 
@@ -170,13 +161,75 @@ res.cookie("token", token, {
   }
 };
 
+export const googleLogin = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      res.status(400).json({ success: false, message: "Missing Google credential" });
+      return;
+    }
+
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+    if (!googleClientId) {
+      console.error("GOOGLE_CLIENT_ID is not set");
+      res.status(500).json({ success: false, message: "Server misconfiguration" });
+      return;
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: googleClientId,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload?.email) {
+      res.status(401).json({ success: false, message: "Invalid Google token" });
+      return;
+    }
+
+    let user = await User.findOne({ email: payload.email });
+
+    if (!user) {
+      const randomPassword = await bcrypt.hash(crypto.randomUUID(), 10);
+      const baseUsername = payload.email.split("@")[0] ?? "user";
+      let username = baseUsername;
+
+      let suffix = 0;
+      while (await User.findOne({ username })) {
+        suffix++;
+        username = `${baseUsername}${suffix}`;
+      }
+
+      user = await User.create({
+        name: payload.name || "New User",
+        email: payload.email,
+        username,
+        passwordHash: randomPassword,
+        ...(payload.picture ? { profile_url: payload.picture } : {}),
+      });
+    }
+
+    const token = generateToken({ userId: user._id.toString() });
+    setAuthCookie(res, token);
+
+    res.status(200).json({
+      success: true,
+      message: "Logged in with Google successfully",
+      user: buildUserResponse(user),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
 export const logout = async (req: Request, res: Response) => {
   try {
-    res.cookie("token", "", {
+    res.clearCookie("token", {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      maxAge: 0,
     });
     res.json({ success: true, message: "Logged out successfully" });
   } catch (error) {
@@ -200,26 +253,17 @@ export const getMe = async (req: Request, res: Response) => {
   }
 };
 
-export const followUser = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const followUser = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
-      res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
+      res.status(401).json({ success: false, message: "Unauthorized" });
       return;
     }
 
     const id = req.params.id;
 
     if (typeof id !== "string" || !mongoose.Types.ObjectId.isValid(id)) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid user id",
-      });
+      res.status(400).json({ success: false, message: "Invalid user id" });
       return;
     }
 
@@ -227,26 +271,17 @@ export const followUser = async (
     const userToFollow = await User.findById(id);
 
     if (!currentUser || !userToFollow) {
-      res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
+      res.status(404).json({ success: false, message: "User not found" });
       return;
     }
 
     if (currentUser._id.equals(userToFollow._id)) {
-      res.status(400).json({
-        success: false,
-        message: "You cannot follow yourself",
-      });
+      res.status(400).json({ success: false, message: "You cannot follow yourself" });
       return;
     }
 
     if (currentUser.following.includes(userToFollow._id)) {
-      res.status(400).json({
-        success: false,
-        message: "Already following this user",
-      });
+      res.status(400).json({ success: false, message: "Already following this user" });
       return;
     }
 
@@ -266,16 +301,10 @@ export const followUser = async (
       text: "started following you",
     });
 
-    res.status(200).json({
-      success: true,
-      message: "User followed successfully!",
-    });
+    res.status(200).json({ success: true, message: "User followed successfully!" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -329,10 +358,7 @@ export const getFollowData = async (req: Request, res: Response) => {
     const id = req.params.id;
 
     if (typeof id !== "string" || !mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Valid user id required",
-      });
+      return res.status(400).json({ success: false, message: "Valid user id required" });
     }
 
     const user = await User.findById(id)
@@ -342,10 +368,7 @@ export const getFollowData = async (req: Request, res: Response) => {
       .lean();
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     return res.status(200).json({
@@ -355,11 +378,7 @@ export const getFollowData = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Get follow data error", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 

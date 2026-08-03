@@ -9,6 +9,7 @@ import {
   register,
   unfollowUser,
   getRecommendations,
+  googleLogin,
 } from "../controllers/user.controller";
 import { authMiddleware } from "../middleware/auth.middleware";
 
@@ -22,5 +23,6 @@ router.post("/follow/:id", authMiddleware, followUser);
 router.post("/unfollow/:id", authMiddleware, unfollowUser);
 router.get("/getFollowData/:id", authMiddleware, getFollowData);
 router.get("/recommendations", authMiddleware, getRecommendations);
+router.post("/google-login", googleLogin);  
 
 export default router;

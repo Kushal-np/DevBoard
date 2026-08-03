@@ -22,7 +22,7 @@ initChatSocket(server);
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "https://devboard-platform.vercel.app",
+    origin: "https://devboard-platform.vercel.app/",
     credentials: true,
   })
 )
