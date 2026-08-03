@@ -1,4 +1,4 @@
-export const API_BASE_URL = "http://localhost:8000/api";
+export const API_BASE_URL = "https://devboard-2-m2po.onrender.com/api";
 
 export const AUTH_ENDPOINTS = {
   LOGIN: `/user/login`,
@@ -37,7 +37,7 @@ export const POST_ENDPOINTS = {
 export const TEXT_POST_ENDPOINTS = {
   CREATE: `/posts`,
   FEED: `/posts/feed`,
-  LIKED: `/posts/liked`,
+  LIKED: `/posts/star`,
   BY_USER: (userId: string) => `/posts/user/${userId}`,
   LIKE: (id: string) => `/posts/${id}/like`,
   DELETE: (id: string) => `/posts/${id}`,
