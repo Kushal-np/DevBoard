@@ -97,12 +97,12 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       cover_url: user.cover_url,
     };
     const token = generateToken({ userId: user._id.toString() });
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
     const response: IAuthResponse = {
       success: true,
       message: "User registered successfully!",
@@ -137,12 +137,12 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = generateToken({ userId: user._id.toString() });
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
 
     const userResponse: IUserResponse = {
       username: user.username,
@@ -174,7 +174,7 @@ export const logout = async (req: Request, res: Response) => {
   try {
     res.cookie("token", "", {
       httpOnly: true,
-      secure: false,
+      secure: true,
       sameSite: "strict",
       maxAge: 0,
     });

@@ -128,12 +128,12 @@ const deleteAccount = async (req, res) => {
             return;
         }
         await user_model_1.default.findByIdAndDelete(req.user._id);
-        res.cookie("token", "", {
-            httpOnly: true,
-            secure: false,
-            sameSite: "strict",
-            maxAge: 0,
-        });
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
         res.status(200).json({ success: true, message: "Account deleted successfully" });
     }
     catch (error) {

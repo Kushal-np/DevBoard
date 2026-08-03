@@ -89,12 +89,12 @@ const register = async (req, res) => {
             cover_url: user.cover_url,
         };
         const token = (0, generateToken_1.default)({ userId: user._id.toString() });
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
         const response = {
             success: true,
             message: "User registered successfully!",
@@ -126,12 +126,12 @@ const login = async (req, res) => {
             return;
         }
         const token = (0, generateToken_1.default)({ userId: user._id.toString() });
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
         const userResponse = {
             username: user.username,
             email: user.email,
@@ -159,12 +159,12 @@ const login = async (req, res) => {
 exports.login = login;
 const logout = async (req, res) => {
     try {
-        res.cookie("token", "", {
-            httpOnly: true,
-            secure: false,
-            sameSite: "strict",
-            maxAge: 0,
-        });
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
         res.json({ success: true, message: "Logged out successfully" });
     }
     catch (error) {
