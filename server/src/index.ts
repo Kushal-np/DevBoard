@@ -22,7 +22,7 @@ initChatSocket(server);
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "http://dev-board-ej2n1587y-kushal-poudels-projects.vercel.app",
     credentials: true,
   })
 )
