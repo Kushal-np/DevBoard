@@ -3,9 +3,9 @@ import { useAuth } from "../hooks/useAuth";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AtSign, Lock, Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
+import apiClient from "../api/axiosConfig";
 
-// Same fixed "activity" heatmap as the register panel, so the two auth
-// screens read as one consistent moment rather than two different pages.
 const activityGrid = [
   0.1, 0.4, 0.15, 0.6, 0.25, 0.1, 0.5, 0.2, 0.7, 0.3, 0.1, 0.4,
   0.3, 0.1, 0.5, 0.2, 0.8, 0.35, 0.15, 0.6, 0.25, 0.45, 0.2, 0.1,
@@ -15,7 +15,7 @@ const activityGrid = [
 ];
 
 const Login = () => {
-  const { login, isLogging } = useAuth();
+  const { login, isLogging, setUser } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -24,6 +24,7 @@ const Login = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
@@ -33,7 +34,6 @@ const Login = () => {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-
     try {
       await login(formData);
       navigate("/feed");
@@ -43,6 +43,26 @@ const Login = () => {
       } else {
         setError("Something went wrong");
       }
+    }
+  }
+
+  async function handleGoogleSuccess(credentialResponse: { credential?: string }) {
+    setError("");
+    setIsGoogleLoading(true);
+    try {
+      const res = await apiClient.post("/user/google-login", {
+        credential: credentialResponse.credential,
+      });
+      setUser(res.data.user);
+      navigate("/feed");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setError(error.response?.data?.message ?? "Google login failed");
+      } else {
+        setError("Google login failed");
+      }
+    } finally {
+      setIsGoogleLoading(false);
     }
   }
 
@@ -113,6 +133,39 @@ const Login = () => {
               {error}
             </div>
           )}
+
+          {/* Google sign-in — a soft card so the iframe doesn't feel bolted on */}
+          <div className="relative mb-5 overflow-hidden rounded-2xl border border-border bg-surface p-3 shadow-sm transition hover:border-primary/40 hover:shadow-md">
+            <div
+              className={`flex justify-center transition-opacity ${
+                isGoogleLoading ? "pointer-events-none opacity-40" : ""
+              }`}
+            >
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError("Google login failed")}
+                theme="outline"
+                shape="pill"
+                size="large"
+                width="368"
+                text="continue_with"
+                logo_alignment="center"
+              />
+            </div>
+            {isGoogleLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-surface/80 backdrop-blur-[1px]">
+                <Loader2 size={18} className="animate-spin text-primary" />
+              </div>
+            )}
+          </div>
+
+          <div className="mb-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
+              Or sign in with email
+            </span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div>

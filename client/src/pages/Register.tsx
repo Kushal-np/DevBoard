@@ -3,6 +3,8 @@ import { useAuth } from "../hooks/useAuth";
 import { useMemo, useState } from "react";
 import axios from "axios";
 import { User, AtSign, Lock, Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
+import apiClient from "../api/axiosConfig";
 
 const passwordRules = [
   { label: "8+ characters", test: (p: string) => p.length >= 8 },
@@ -33,6 +35,7 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
@@ -59,6 +62,25 @@ const Register = () => {
       } else {
         setError("Something went wrong");
       }
+    }
+  }
+
+  async function handleGoogleSuccess(credentialResponse: { credential?: string }) {
+    setError("");
+    setIsGoogleLoading(true);
+    try {
+      await apiClient.post("/user/google-login", {
+        credential: credentialResponse.credential,
+      });
+      navigate("/feed");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setError(error.response?.data?.message ?? "Google login failed");
+      } else {
+        setError("Google login failed");
+      }
+    } finally {
+      setIsGoogleLoading(false);
     }
   }
 
@@ -131,6 +153,39 @@ const Register = () => {
               {error}
             </div>
           )}
+
+          {/* Google sign-up — placed above the form since it's the fastest path */}
+          <div className="relative mb-5 overflow-hidden rounded-2xl border border-border bg-surface p-3 shadow-sm transition hover:border-primary/40 hover:shadow-md">
+            <div
+              className={`flex justify-center transition-opacity ${
+                isGoogleLoading ? "pointer-events-none opacity-40" : ""
+              }`}
+            >
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError("Google login failed")}
+                theme="outline"
+                shape="pill"
+                size="large"
+                width="368"
+                text="continue_with"
+                logo_alignment="center"
+              />
+            </div>
+            {isGoogleLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-surface/80 backdrop-blur-[1px]">
+                <Loader2 size={18} className="animate-spin text-primary" />
+              </div>
+            )}
+          </div>
+
+          <div className="mb-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
+              Or continue with email
+            </span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div>
