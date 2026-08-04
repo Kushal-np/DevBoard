@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, Rocket, Users, MessageSquare, FolderGit2, Terminal, Sparkles, CheckCircle2,  Zap } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Rocket, Users, MessageSquare, FolderGit2, Terminal, Sparkles,   Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import Button from "../components/ui/Button";
 
@@ -6,7 +6,6 @@ function LandingPage() {
   return (
     <div className="bg-background text-text">
       <Hero />
-      <TrustBar />
       <Features />
       <HowItWorks />
       <EarlyAccess />
@@ -160,36 +159,7 @@ function Hero() {
 
 /* --------------------------------- Trust Bar --------------------------------- */
 
-function TrustBar() {
-  const stats = [
-    { value: "47", label: "Builders joined", icon: <Users size={16} /> },
-    { value: "12", label: "Projects live", icon: <FolderGit2 size={16} /> },
-    { value: "100%", label: "Human-curated", icon: <CheckCircle2 size={16} /> },
-  ];
 
-  return (
-    <section className="border-b border-border py-8">
-      <div className="mx-auto max-w-7xl px-6 md:px-10">
-        <div className="flex flex-wrap items-center justify-between gap-6">
-          <p className="font-mono text-xs uppercase tracking-wider text-text-secondary/60">
-            Built by developers, for developers
-          </p>
-          <div className="flex flex-wrap items-center gap-8">
-            {stats.map((stat) => (
-              <div key={stat.label} className="flex items-center gap-2">
-                <span className="text-primary/60">{stat.icon}</span>
-                <div>
-                  <span className="font-display text-lg font-semibold text-text">{stat.value}</span>
-                  <span className="ml-1.5 text-sm text-text-secondary">{stat.label}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* --------------------------------- Features -------------------------------- */
 
