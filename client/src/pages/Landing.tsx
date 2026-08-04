@@ -76,7 +76,7 @@ function Hero() {
                   <span className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 </Button>
               </Link>
-              <Link to="/explore">
+              <Link to="/login">
                 <Button variant="secondary" size="md" className="group">
                   See what's live
                   <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -84,19 +84,7 @@ function Hero() {
               </Link>
             </div>
 
-            <div className="mt-10 flex items-center gap-8">
-              <div className="flex -space-x-2">
-                {["https://i.pravatar.cc/40?img=1", "https://i.pravatar.cc/40?img=2", "https://i.pravatar.cc/40?img=3", "https://i.pravatar.cc/40?img=4"].map((src, i) => (
-                  <div key={i} className="h-9 w-9 rounded-full border-2 border-background bg-surface-hover ring-2 ring-border">
-                    <img src={src} alt="" className="h-full w-full rounded-full object-cover" />
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-text">Join <span className="text-primary font-semibold">47</span> early builders</p>
-                <p className="text-xs text-text-secondary">No waitlist, no gates</p>
-              </div>
-            </div>
+
           </div>
 
           {/* Terminal panel with improved design */}
@@ -342,7 +330,6 @@ function HowItWorks() {
   );
 }
 
-/* ------------------------------- Early access ------------------------------ */
 
 function EarlyAccess() {
   const points = [
