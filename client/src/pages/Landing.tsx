@@ -14,6 +14,7 @@ function LandingPage() {
     </div>
   );
 }
+//landing page
 
 
 function Hero() {
