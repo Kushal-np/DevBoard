@@ -24,7 +24,7 @@ app.use(
   cors({
     origin: "https://devboard-platform.vercel.app",
     credentials: true,
-  })
+  })//all origin
 )
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
